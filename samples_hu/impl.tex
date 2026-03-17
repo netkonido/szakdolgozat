@@ -1,20 +1,73 @@
 \chapter{Fejlesztői dokumentáció}
 \label{ch:impl}
 
-\section{Követelményelemzés}
+\section{Specifikáció}
 
-A feladat egy webalkalmazás fejlesztése ami személyre szabott önéletrajzokat készít a felhasználónak. A program lehetőséget nyújt a felhasználónak adatai beviltelére szöveges mezőkön és file feltöltésen keresztül. A program generatív mesterséges intelligencia  segítségével feldolgozza a felhasználó által megagott adatokat és fileokat, majd egy személyre szabott önéletrajzot készít. A kész önéletrajzot a felhasználó áttekintheti, szükség esetén újrageneráltathatja, illetve több formátumban letöltheti. A felhasználó akármikor visszatérhet az előző lépéshez, vagy megszakíthatja a munkamenetet. Minden adat amit a felhasználó megadott, törlésre kerül a programból való kilépés után, valamint az aktuális munkamenet megszakítását követően.
+A feladat egy webalkalmazás fejlesztése ami személyre szabott önéletrajzokat készít a felhasználónak. A program lehetőséget nyújt a felhasználónak adatai beviltelére szöveges mezőkön, file feltöltésen, illetve LinkedIn profil megadásán keresztül. A program generatív mesterséges intelligencia és Retrieval-Augmented Generation segítségével feldolgozza a felhasználó által megagott adatokat és fileokat, majd egy személyre szabott önéletrajzot készít. A kész önéletrajzot a felhasználó áttekintheti, szükség esetén újrageneráltathatja, illetve több formátumban letöltheti. A felhasználó akármikor visszatérhet az előző lépéshez, vagy megszakíthatja a munkamenetet. Minden adat amit a felhasználó megadott, törlésre kerül a programból való kilépés után, valamint az aktuális munkamenet megszakítását követően.
 
-\subsection{Specifikáció}
+\subsection{Követelményelemzés}
 
-Megvalósíthatási elemzés?
+\subsubsection{Funkcionális követelmények}
 
-\subsection{Funkcionális követelmények}
+\paragraph{Megnyitás:}
 
-Milyen formátumban, miket írjak le, mennyire részletesen fejtsem ki?
-Példák?
+A program webalkalmazás formájában elérhető modern webböngészőből (Pl: Google Chrome, Microsoft Edge, Mozzilla Firefox, stb...). Az alkalmazás elérése után a nyitólap(link to nyitólap image) látható.
 
-\subsection{Nem funkcionális követelmények}
+\paragraph{Adatbevitel:}
+
+A felhasználónak több módon áll lehetősége adatokat bevinni.
+
+\begin{enumerate}
+
+    \item File feltöltéssel
+    
+A feltöltött fileok lehetnek szöveges vagy kép formátumban, és tartalmazhatnak korábbi önéletrajzokat, okleveleket, elismervényeket, bizonyítványokat és más tanúsítványokat.
+    
+    \item Szöveges mezőn keresztül
+
+A felhasználó manuálisan megadhat adatokat tanulmányairól, képzéseiről és munkatapasztalatairól. A bevitt szöveges adatok tartalmáról a felhasználónak nyilatkoznia kell lsitából való kiválasztással. 
+    
+    \item LinkedIn profil link megadásával
+
+A felhasználó Linkedin profiljának linkje segítségével a felhasználó profilja és adatai gyorsan és egyszerűen kitölthetőek.
+
+\end{enumerate} 
+
+\paragraph{Állás specifikálása:}
+
+Az adatbevitel után a felhasználónak specifikálnia kell az állást szöveges bevitelen keresztül. A felhasználó megadhatja az álláshirdetést, vagy egy linket ami a kiíráshoz mutat.
+
+\paragraph{Visszalépés:}
+
+A felhasználónak lehetősége van minden lépés után visszalépni az előző oldalra.
+
+\paragraph{Generálás:}
+
+Az alkalmazás a felhasználó által megadott adatok alapján generál egy önéletrajzot, majd ezt prezentálja a felhasználónak. A felhasználó megismételheti a generálási folyamatot, amennyiben nem elégedett a kimenettel.
+
+\paragraph{Letöltés:}
+
+A generálás után a felhasználó kiválaszthatja, milyen formátumban szeretné letölteni az önéletrajzát. Az elérhető formátumok: PDF, docx, md
+
+\paragraph{Kilépés}
+
+Miután a felhasználó befejezte önéletrajzának elkészítését, kiléphet az alkalmazásból a böngészőablak bezárásával, vagy visszaléphet a kezdőképernyőre az aktuális munkamenet megszakítását követően.
+
+\subsubsection{Nem funkcionális követelmények}
+
+\paragraph{Felhasználók:}
+
+A felhasználónak nem kell regisztrálnia az alkalmazás használatához. Az alkalmazásnak nincsen adminisztrátori felülete.
+
+\paragraph{Munkamenet:}
+
+Az alkalmazás webböngészővel történő megnyitása során az alkalmazás egyedi azonosítóval látja el az aktuális munkamenetet, amit a webböngésző ideiglenesen tárol. Ezen azonosító segítségével követi az alkalmazás a felhasználó által megadott adatokat és feltöltött fileokat. A munkamenet megszakadása történhet automatikusan, 10 perc inaktivitás után, illetve manuálisan, a felhasználó kérésére.
+
+\paragraph{Adatkezelés:}
+
+A felhasználó által megadott adatok és feltöltött dokumentumok nem kerülnek perzisztens tárolásra. Az alkalmazás elindításakor az adatbázis üres állapotba inicializálódik. Az adatbázisban csak az aktív munkamenetekhez köthető adatok kerülnek tárolásra. A munkamenet megszakítása után ezek az adatok törlődnek, és nem lehet őket visszaállítani.
+
+\paragraph{TODO:}
 
 \begin{itemize}
     \item MI-vel kapcsolatos dolgok
