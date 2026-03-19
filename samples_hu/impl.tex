@@ -5,13 +5,15 @@
 
 A feladat egy webalkalmazás fejlesztése ami személyre szabott önéletrajzokat készít a felhasználónak. A program lehetőséget nyújt a felhasználónak adatai beviltelére szöveges mezőkön, file feltöltésen, illetve LinkedIn profil megadásán keresztül. A program generatív mesterséges intelligencia és Retrieval-Augmented Generation segítségével feldolgozza a felhasználó által megagott adatokat és fileokat, majd egy személyre szabott önéletrajzot készít. A kész önéletrajzot a felhasználó áttekintheti, szükség esetén újrageneráltathatja, illetve több formátumban letöltheti. A felhasználó akármikor visszatérhet az előző lépéshez, vagy megszakíthatja a munkamenetet. Minden adat amit a felhasználó megadott, törlésre kerül a programból való kilépés után, valamint az aktuális munkamenet megszakítását követően.
 
-\subsection{Követelményelemzés}
+%\subsection{Követelményelemzés}
 
-\subsubsection{Funkcionális követelmények}
+\subsection{Funkcionális követelmények}
 
 \paragraph{Megnyitás:}
 
-A program webalkalmazás formájában legyen elérhető modern webböngészőből (Pl: Google Chrome, Microsoft Edge, Mozzilla Firefox, stb...). A böngészőben a megfelelő cím beírása után jelenjen meg a nyitólap és automatikusan induljon el egy új munkamenet.
+A program webalkalmazás formájában legyen elérhető modern webböngészőből\footnote{Google Chrome, Microsoft Edge, Safari, Mozzilla Firefox, Opera, Brave}. A böngészőben a [megfelelő elérési útvonal] keresősávba való beírása után jelenjen meg a nyitólap és automatikusan induljon el egy új munkamenet.
+
+\pagebreak
 
 \paragraph{Adatbevitel:}
 
@@ -64,19 +66,19 @@ A felhasználó tudja letölteni az önéletrajzot. A felhasználó tudja kivál
 
 A felhasználó tudjon kilépni az alkalmazásból a böngészőablak bezárásával. A felhasználó tudja megszakítani a munkamenetet a folyamat akármelyik lépése közben. A program lépjen vissza a kezdőképernyőre a munkamenet megszakítása után.
 
-\subsubsection{Nem funkcionális követelmények}
+\subsection{Nem funkcionális követelmények}
 
 \paragraph{Felhasználók:}
 
-A felhasználónak nem kell regisztrálnia az alkalmazás használatához. Az alkalmazásnak nincsen adminisztrátori felülete.
+A felhasználó tudja bejelentkezés vagy regisztráció nélkül használni az alkalmazást. Az alkalmazásnak ne legyen adminisztrátori felülete.
 
 \paragraph{Munkamenet:}
 
-Az alkalmazás webböngészővel történő megnyitása során az alkalmazás egyedi azonosítóval látja el az aktuális munkamenetet, amit a webböngésző ideiglenesen tárol. Ezen azonosító segítségével követi az alkalmazás a felhasználó által megadott adatokat és feltöltött fileokat. A munkamenet megszakadása történhet automatikusan, 10 perc inaktivitás után, illetve manuálisan, a felhasználó kérésére.
+Az program lássa el egyedi azonosítóval az új munkameneteket. A program az azonosító segítségével kövesse a felhasználó által megadott adatokat és feltöltött fileokat. A program szakítsa meg a munkamenetet 10 perc inaktivitás után.
 
 \paragraph{Adatkezelés:}
 
-A felhasználó által megadott adatok és feltöltött dokumentumok nem kerülnek perzisztens tárolásra. Az alkalmazás elindításakor az adatbázis üres állapotba inicializálódik. Az adatbázisban csak az aktív munkamenetekhez köthető adatok kerülnek tárolásra. A munkamenet megszakítása után ezek az adatok törlődnek, és nem lehet őket visszaállítani.
+A program ne tárolja perzisztensen a felhasználó által megadott adatokat és feltöltött fileokat. A program elindításakor az adatbázis inicializálódjon üres állapotba. Az adatbázisban csak az aktív munkamenetekhez köthető adatok kerüljenek tárolásra. A munkamenet megszakítása után a munkamenethez kapcsolódó tárolt adatok törlődjenek.
 
 \paragraph{TODO:}
 
@@ -110,7 +112,45 @@ Felhasználói történetek
 
 \section{Tervezés}
 
-\subsection {Diagrammok}
+\subsection{Felhasználói felület terv}
+
+\begin{enumerate}
+    \item \textbf{Nyitólap:}
+
+Ez az oldal jelenik meg amikor a felhasználó megnyitja a webböngészőn keresztül az alkalmazást. Ezen az oldalon egy gomb van "Kezdés" felirattal.
+    
+    \item \textbf{Adatbevitel file feltöltéssel, LinkedIn hivatkozással:}
+
+    Ezen az oladlon a felhasználó egy szövegdobozban megadhatja a LinkedIn profiljának linkjét vagy tölthet fel fileokat [drag-and-drop módszerrel vagy] a "File feltöltés" gomb megnyomásával, majd a megfelelő file kiválasztásával. A feltöltött fileok nevei egy listában jelennek meg. Legfeljebb 10 file feltöltésére van lehetősége a felhasználónak, ezt egy számláló jelzi a gombon.  Ha a felhasználó befejezte az adatbevitelt, a "Tovább" gombbal léphet a következő oldalra.
+    
+    \item \textbf{Adatok áttekintése és szerkesztése:}
+
+    Az oldal megjelenésekor még nem biztos, hogy a mesterséges intelligencia modell visszatért a kinyert adatokkal. Az adatok beérkezéséig az oldalon egy betöltési animáció jelenik meg. Az adatok listázásra kerülnek kategóriákba rendezve:
+
+    \begin{enumerate}
+        \item Tanulmányok
+        \item Munkatapasztalat
+        \item Képesítések
+        \item Egyebek
+    \end{enumerate}
+
+    A felhasználó minden elemnél a szerkesztés ikonra kattintva megváltoztathatja a mező tartalmát. A felhasználó a törlés ikonra kattintva eltávolíthatja az elemet. A felhasználó a hozzáadás ikonra kattintva új elemet hozhat létre. Az új elem tartalmát a megjelenő szövegdobozba való bevitellel adhatja meg, kategóriáját a legördülő menüből választhatja ki. A bevitelt véglegesítheti a zöld pipára kattintva, elvetheti a piros "X"-re kattintva. Ha a felhasználó elégedett az adatokkal, a "Tovább gombra kattintva folytathatja a folyamatot.
+
+    \item \textbf{Álláshirdetés megadása:}
+
+    A felhasználó szöveges mezőn keresztül megadhatja az álláshirdetés részleteit, vagy az álláshirdetésre mutató hivatkozást. A hivatkozás megadása esetében a program mesterséges intelligenciával kinyeri a releváns információkat, és betölti a szöveges mezőbe, amit a felhasználó szerkeszthet a továbblépés előtt.
+    
+    \item \textbf{Önéletrajz áttekintés:}
+
+    Az önéletrajz vázlat generálása után a felhasználó áttekintheti azt, és az "Újragenerálás" gombbal megismételheti a generálási folyamatot.
+    
+    \item \textbf{Letöltés:}
+
+    Amennyiben a felhasználó elégedett az eredménnyel, kiválaszthatja a kimeneti formátumot, majd letöltheti az önéletrajzát.
+    
+\end{enumerate}
+
+\subsection{Diagrammok}
 
 \section{Megvalósítás}
 
