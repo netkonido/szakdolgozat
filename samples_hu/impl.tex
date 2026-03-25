@@ -80,7 +80,8 @@ Az program lássa el egyedi azonosítóval az új munkameneteket. A program az a
 
 A program ne tárolja perzisztensen a felhasználó által megadott adatokat és feltöltött fileokat. A program elindításakor az adatbázis inicializálódjon üres állapotba. Az adatbázisban csak az aktív munkamenetekhez köthető adatok kerüljenek tárolásra. A munkamenet megszakítása után a munkamenethez kapcsolódó tárolt adatok törlődjenek.
 
-\paragraph{TODO:}
+
+\paragraph{Maybe}
 
 \begin{itemize}
     \item MI-vel kapcsolatos dolgok
@@ -112,30 +113,55 @@ Felhasználói történetek
 
 \section{Tervezés}
 
-\subsection{Felhasználói felület terv}
+\subsection{Architektúra}
+
+A spring boot alkalmazás architektúrájának leírása
+
+\subsection{Adatbázis}
+
+A működés közben szükséges adatokat egy lokális, memóriában létező adatbázisban tárolja a program. Ez az adatbázis a program bezárásakor törlődik. A tárolt adatok típusai a következőek lehetnek:
+\begin{itemize}
+    \item Felhasználói adat
+    \begin{itemize}
+        \item Név
+        \item Email cím
+        \item Telefonszám
+        \item Tanulmány adat
+        \item Munkatapasztalat adat
+        \item Képzettség adat
+        \item Egyéb adat
+    \end{itemize}
+    \item Álláshirdetés adat
+    \item File
+\end{itemize}
+
+\subsection{Felhasználói felület}
+
+Az alkalmazásnak a következő oldalakat kell tartalmaznia
 
 \begin{enumerate}
     \item \textbf{Nyitólap:}
 
 Ez az oldal jelenik meg amikor a felhasználó megnyitja a webböngészőn keresztül az alkalmazást. Ezen az oldalon egy gomb van "Kezdés" felirattal.
     
-    \item \textbf{Adatbevitel file feltöltéssel, LinkedIn hivatkozással:}
+    \item \textbf{Adatok bevitele:}
 
-    Ezen az oladlon a felhasználó egy szövegdobozban megadhatja a LinkedIn profiljának linkjét vagy tölthet fel fileokat [drag-and-drop módszerrel vagy] a "File feltöltés" gomb megnyomásával, majd a megfelelő file kiválasztásával. A feltöltött fileok nevei egy listában jelennek meg. Legfeljebb 10 file feltöltésére van lehetősége a felhasználónak, ezt egy számláló jelzi a gombon.  Ha a felhasználó befejezte az adatbevitelt, a "Tovább" gombbal léphet a következő oldalra.
-    
-    \item \textbf{Adatok áttekintése és szerkesztése:}
-
-    Az oldal megjelenésekor még nem biztos, hogy a mesterséges intelligencia modell visszatért a kinyert adatokkal. Az adatok beérkezéséig az oldalon egy betöltési animáció jelenik meg. Az adatok listázásra kerülnek kategóriákba rendezve:
+    Az oldalon a felhasználó megadhatja az önéletrajz elkészítéséhez szükséges információkat. Az adatok csoportokra bontva adhatóak meg.
 
     \begin{enumerate}
+        \item Alapadatok
         \item Tanulmányok
         \item Munkatapasztalat
         \item Képesítések
         \item Egyebek
     \end{enumerate}
 
-    A felhasználó minden elemnél a szerkesztés ikonra kattintva megváltoztathatja a mező tartalmát. A felhasználó a törlés ikonra kattintva eltávolíthatja az elemet. A felhasználó a hozzáadás ikonra kattintva új elemet hozhat létre. Az új elem tartalmát a megjelenő szövegdobozba való bevitellel adhatja meg, kategóriáját a legördülő menüből választhatja ki. A bevitelt véglegesítheti a zöld pipára kattintva, elvetheti a piros "X"-re kattintva. Ha a felhasználó elégedett az adatokkal, a "Tovább gombra kattintva folytathatja a folyamatot.
+    A felhasználó az alapadatait szövegdobozokban adhatja meg. A többi kategóriában csoportosítva láthatja az adatokat. A hozzáadás ikonra kattintva új elemet vehet fel, aminek tartalmát a megjelenő szövegdobozba való bevitellel adhatja meg. A bevitelt véglegesítheti a zöld pipára kattintva, elvetheti a piros "X"-re kattintva. A meglévő adatokat megváltoztathatja a szerkesztés ikonra kattintva, illetve törölheti a törlés ikonra kattintva. Amennyiben a felhasználó elégedett az adatokkal, a "Tovább gombra kattintva folytathatja a folyamatot.
 
+    \item \textbf{Adatok importálása:}
+
+    Ezen az oladlon a felhasználó egy szövegdobozban megadhatja a LinkedIn profiljának linkjét vagy tölthet fel fileokat [drag-and-drop módszerrel vagy] a "File feltöltés" gomb megnyomásával, majd a megfelelő file kiválasztásával. A feltöltött fileok nevei egy listában jelennek meg. Legfeljebb 10 file feltöltésére van lehetősége a felhasználónak, ezt egy számláló jelzi a gombon.  Ha a felhasználó befejezte az adatbevitelt, a "Tovább" gombbal léphet a következő oldalra. Ekkor a feltöltött adatok feldolgozásra kerülnek a mesterséges intelligencia által, és az eredmény automatikusan betöltésre kerül az adatbázisba.
+    
     \item \textbf{Álláshirdetés megadása:}
 
     A felhasználó szöveges mezőn keresztül megadhatja az álláshirdetés részleteit, vagy az álláshirdetésre mutató hivatkozást. A hivatkozás megadása esetében a program mesterséges intelligenciával kinyeri a releváns információkat, és betölti a szöveges mezőbe, amit a felhasználó szerkeszthet a továbblépés előtt.
@@ -150,7 +176,16 @@ Ez az oldal jelenik meg amikor a felhasználó megnyitja a webböngészőn keres
     
 \end{enumerate}
 
-\subsection{Diagrammok}
+\subsection{API}
+ 
+A felhasználói felület és az üzleti logika RESTful API-n keresztül kommunikál. Az api elérése http kéréseken keresztül lehetséges. - pongyola
+
+Az API sémája 
+
+\begin{itemize}
+    \item /data
+    \item /files
+\end{itemize}
 
 \section{Megvalósítás}
 
