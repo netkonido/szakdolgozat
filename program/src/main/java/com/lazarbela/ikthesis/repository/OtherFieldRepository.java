@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface OtherFieldRepository extends JpaRepository<OtherField, Integer> {
-    List<OtherField> findBySessionId(String sessionId);
+    //List<OtherField> findBySessionId(String sessionId);
 }

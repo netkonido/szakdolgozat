@@ -1,27 +1,43 @@
 package com.lazarbela.ikthesis.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.Instant;
 import java.util.List;
 
 @Data
-@Builder
 @NoArgsConstructor
-@RequiredArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
 public class Session {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String SessionId;
+    private Instant timestamp;
 
+    @OneToOne
     private User user;
+
+    @Singular
+    @OneToMany
     private List<Certification> certifications;
+
+    @Singular
+    @OneToMany
     private List<Education> educations;
-    private List<FileLink> fileLinks;
+
+    @Singular
+    @OneToMany
+    private List<FileMetadata> files;
+
+    @Singular
+    @OneToMany
     private List<OtherField> otherFields;
+
+    @Singular
+    @OneToMany
     private List<WorkExperience> workExperiences;
 
 }

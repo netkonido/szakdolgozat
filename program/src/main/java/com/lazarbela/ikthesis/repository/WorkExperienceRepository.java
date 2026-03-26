@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface WorkExperienceRepository extends JpaRepository<WorkExperience, Integer> {
-    List<WorkExperience> findBySessionId(String sessionId);
+    //List<WorkExperience> findBySessionId(String sessionId);
 }

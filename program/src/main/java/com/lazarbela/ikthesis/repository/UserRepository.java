@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
-    List<User> findBySessionId(String sessionId);
+    //List<User> findBySessionId(String sessionId);
 }
