@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface FileMetadataRepository extends JpaRepository<FileMetadata, String> {
-    //List<FileMetadata> findBySessionId(String sessionId);
+    List<FileMetadata> findBySessionId(String sessionId);
 }

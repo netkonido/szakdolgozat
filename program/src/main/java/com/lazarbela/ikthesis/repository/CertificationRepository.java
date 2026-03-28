@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface CertificationRepository extends JpaRepository<Certification, Integer> {
-    //List<Certification> FindBySessionID(String sessionId);
+    List<Certification> findBySessionId(String sessionId);
 }

@@ -17,5 +17,5 @@ public class Certification {
     @NonNull
     private String content;
     @NonNull
-    private String sessionID;
+    private String sessionId;
 }

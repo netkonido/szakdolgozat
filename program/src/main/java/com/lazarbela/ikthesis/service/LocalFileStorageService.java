@@ -1,22 +1,23 @@
 package com.lazarbela.ikthesis.service;
 
+import com.lazarbela.ikthesis.model.FileMetadata;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import javax.naming.directory.BasicAttributes;
+import java.io.*;
+import java.nio.file.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 
 @Service
-public class LocalFileStorageService {
+public class LocalFileStorageService
+{
     private final FileStorageProperties properties;
     private final Path rootPath;
 
@@ -35,22 +36,26 @@ public class LocalFileStorageService {
         String storedName = UUID.randomUUID() + (ext.isEmpty() ? "" : "." + ext);
         Path filePath = storageDirectory.resolve(storedName);
 
-        try(OutputStream outputStream = Files.newOutputStream(filePath, StandardOpenOption.CREATE_NEW)) {
+        try(OutputStream outputStream = Files.newOutputStream(filePath, StandardOpenOption.CREATE_NEW))
+        {
             StreamUtils.copy(inputStream, outputStream);
         }
 
         return rootPath.relativize(filePath).toString();
     }
 
-    public Resource getFileResource(String storedPath) throws IOException {
+    public Resource getFileResource(String storedPath) throws IOException
+    {
         Path filePath = rootPath.resolve(storedPath).normalize().toAbsolutePath();
         Path normalizedRoot = rootPath.normalize().toAbsolutePath();
 
-        if(!filePath.startsWith(normalizedRoot)) {
+        if(!filePath.startsWith(normalizedRoot))
+        {
             throw new SecurityException("Access denied");
         }
 
-        if(!Files.exists(filePath)) {
+        if(!Files.exists(filePath))
+        {
             throw new FileNotFoundException("File not found");
         }
 
@@ -66,5 +71,35 @@ public class LocalFileStorageService {
             return filename.substring(dotIndex + 1);
         }
         return "";
+    }
+
+    public void deleteFile(String storedPath) throws IOException
+    {
+        Path filePath = rootPath.resolve(storedPath).normalize().toAbsolutePath();
+        Path normalizedRoot = rootPath.normalize().toAbsolutePath();
+
+        if(!filePath.startsWith(normalizedRoot))
+        {
+            throw new SecurityException("Access denied");
+        }
+
+        if(!Files.exists(filePath))
+        {
+            throw new FileNotFoundException("File not found");
+        }
+
+        Files.delete(filePath);
+    }
+
+    public void deleteSessionFolder(String sessionId) throws IOException
+    {
+        Path normalizedFolderPath = rootPath.resolve(sessionId).normalize();
+        Files.walkFileTree(normalizedFolderPath, new SimpleFileVisitor<Path>(){
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                java.nio.file.Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 }

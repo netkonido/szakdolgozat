@@ -13,6 +13,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -64,7 +66,6 @@ public class FileService {
         return repository.findById(fileName).orElseThrow(() -> new FileNotFoundException("No such file"));
     }
 
-
     private void validateFile(MultipartFile file)
     {
         if(file.isEmpty())
@@ -76,5 +77,27 @@ public class FileService {
         {
             throw new IllegalArgumentException("Invalid mime type");
         }
+    }
+
+    public FileMetadata deleteFile(String fileName) throws IOException
+    {
+        FileMetadata metadata = getFileMetadata(fileName);
+        storageService.deleteFile(metadata.getStoredPath());
+        repository.delete(metadata);
+        return metadata;
+    }
+
+    public List<FileMetadata> deleteSessionFiles(String sessionId) throws IOException
+    {
+        List<FileMetadata> filesToDelete = repository.findBySessionId(sessionId);
+        List<FileMetadata> deletedFiles = new ArrayList<>();
+        for(FileMetadata metadata : filesToDelete)
+        {
+                storageService.deleteFile(metadata.getStoredPath());
+                repository.delete(metadata);
+                deletedFiles.add(metadata);
+        }
+        storageService.deleteSessionFolder(sessionId);
+        return deletedFiles;
     }
 }

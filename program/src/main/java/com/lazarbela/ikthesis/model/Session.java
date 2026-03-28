@@ -14,7 +14,12 @@ import java.util.List;
 public class Session {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String SessionId;
+    private String sessionId;
+
+    @NonNull
+    private String secret;
+
+    @NonNull
     private Instant timestamp;
 
     @OneToOne
