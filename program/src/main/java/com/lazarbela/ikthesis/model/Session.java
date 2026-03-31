@@ -22,8 +22,9 @@ public class Session {
     @NonNull
     private Instant timestamp;
 
-    @OneToOne
-    private User user;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "userData_id", referencedColumnName = "id")
+    private UserData userData;
 
     @Singular
     @OneToMany

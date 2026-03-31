@@ -2,41 +2,88 @@ package com.lazarbela.ikthesis.controller;
 
 import com.lazarbela.ikthesis.model.*;
 import com.lazarbela.ikthesis.service.DataService;
+import lombok.AllArgsConstructor;
+import org.apache.catalina.User;
+import org.hibernate.jdbc.Work;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("api/v1/data")
+@AllArgsConstructor
+@RequestMapping("/api/v1/data")
 public class DataController {
 
     //TODO: DELETE mappings
     //TODO: UPDATE mappings
 
-    private DataService dataService;
+    private final DataService dataService;
 
-    @GetMapping("/session-information")
-    public ResponseEntity<?> getSessionInformation (@PathVariable String sessionId)
+    @GetMapping("/session")
+    public ResponseEntity<?> getSessionInformation (@RequestParam("sessionId") String sessionId)
     {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
     }
 
-    @GetMapping("/user")
-    public User getUserData (@RequestParam("sessionId") String sessionId)
+    @GetMapping("/user-data")
+    public UserData getUserData (@RequestParam("sessionId") String sessionId)
     {
         return dataService.getUserData(sessionId);
     }
 
-    @PostMapping("/user")
-    public ResponseEntity<?> postUserData (
+    @PostMapping("/user-data")
+    public ResponseEntity<UserData> postUserData (
             @RequestParam("sessionId") String sessionId,
-            @RequestParam("userData") User userData)
+            @RequestParam("name") String name,
+            @RequestParam("email") String email,
+            @RequestParam("telephone") Optional<String> telephone)
     {
-        dataService.saveUser(userData);
-        return ResponseEntity.ok().build();
+        try
+        {
+            UserData newUserData;
+            if(telephone.isPresent())
+            {
+                newUserData = dataService.saveUserData(new UserData(sessionId, name, email, telephone.get()));
+            }
+            else
+            {
+                newUserData = dataService.saveUserData(new UserData(sessionId, name, email));
+            }
+            return ResponseEntity.ok(newUserData);
+        }
+        catch(IllegalArgumentException e)
+        {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    @PatchMapping("/user-data")
+    public ResponseEntity<UserData> patchUserData (
+            @RequestParam("sessionId") String sessionId,
+            @RequestParam("name") Optional<String> name,
+            @RequestParam("email") Optional<String> email,
+            @RequestParam("telephone") Optional<String> telephone)
+    {
+        try
+        {
+            UserData newUserData = dataService.updateUserData(sessionId, name, email, telephone);
+            return ResponseEntity.ok(newUserData);
+        }
+        catch(Exception e)
+        {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @DeleteMapping("/user-data")
+    public ResponseEntity<Void> deleteUserData(@RequestParam("sessionId") String sessionId)
+    {
+        dataService.deleteUserData(sessionId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/certifications")
@@ -46,12 +93,44 @@ public class DataController {
     }
 
     @PostMapping("/certifications")
-    public ResponseEntity<?> postCertification (
+    public ResponseEntity<Certification> postCertification (
             @RequestParam("sessionId") String sessionId,
-            @RequestParam("certification") Certification certification)
+            @RequestParam("content") String content)
     {
+        Certification certification = new Certification();
+
+        certification.setSessionId(sessionId);
+        certification.setContent(content);
+
         dataService.saveCertification(certification);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(certification);
+    }
+
+    @PatchMapping("/certifications")
+    public ResponseEntity<Certification> updateCertification(
+            @RequestParam String sessionId,
+            @RequestParam int certificationId,
+            @RequestParam String content
+    ) {
+        try {
+            Certification updated = dataService.updateCertification(sessionId, certificationId, content);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @DeleteMapping("/certifications")
+    public ResponseEntity<Void> deleteCertification(
+            @RequestParam String sessionId,
+            @RequestParam int certificationId
+    ) {
+        try {
+            dataService.deleteCertification(sessionId, certificationId);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/educations")
@@ -61,12 +140,44 @@ public class DataController {
     }
 
     @PostMapping("/educations")
-    public ResponseEntity<?> postEducation (
+    public ResponseEntity<Education> postEducation (
             @RequestParam("sessionId") String sessionId,
-            @RequestParam("education") Education education)
+            @RequestParam("content") String content)
     {
+        Education education = new Education();
+
+        education.setSessionId(sessionId);
+        education.setContent(content);
+
         dataService.saveEducation(education);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(education);
+    }
+
+    @PatchMapping("/educations")
+    public ResponseEntity<Education> updateEducation(
+            @RequestParam String sessionId,
+            @RequestParam int educationId,
+            @RequestParam String content
+    ) {
+        try {
+            Education updated = dataService.updateEducation(sessionId, educationId, content);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @DeleteMapping("/educations")
+    public ResponseEntity<Void> deleteEducation(
+            @RequestParam String sessionId,
+            @RequestParam int educationId
+    ) {
+        try {
+            dataService.deleteEducation(sessionId, educationId);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/other-fields")
@@ -76,12 +187,44 @@ public class DataController {
     }
 
     @PostMapping("/other-fields")
-    public ResponseEntity<?> postOtherFields (
+    public ResponseEntity<OtherField> postOtherFields (
             @RequestParam("sessionId") String sessionId,
-            @RequestParam("otherField") OtherField otherField)
+            @RequestParam("content") String content)
     {
+        OtherField otherField = new OtherField();
+
+        otherField.setSessionId(sessionId);
+        otherField.setContent(content);
+
         dataService.saveOtherField(otherField);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(otherField);
+    }
+
+    @PatchMapping("/other-fields")
+    public ResponseEntity<OtherField> updateOtherField(
+            @RequestParam String sessionId,
+            @RequestParam int otherFieldId,
+            @RequestParam String content
+    ) {
+        try {
+            OtherField updated = dataService.updateOtherField(sessionId, otherFieldId, content);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @DeleteMapping("/other-fields")
+    public ResponseEntity<Void> deleteOtherField(
+            @RequestParam String sessionId,
+            @RequestParam int otherFieldId
+    ) {
+        try {
+            dataService.deleteOtherField(sessionId, otherFieldId);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/work-experiences")
@@ -90,19 +233,50 @@ public class DataController {
         return dataService.getWorkExperiences(sessionId);
     }
 
-    @GetMapping("/work-experiences")
-    public ResponseEntity<?> getWorkExperiences (
+    @PostMapping("/work-experiences")
+    public ResponseEntity<WorkExperience> getWorkExperiences (
             @RequestParam("sessionId") String sessionId,
-            @RequestParam("workExperience") WorkExperience workExperience)
+            @RequestParam("content") String content)
     {
+        WorkExperience workExperience = new WorkExperience();
+
+        workExperience.setSessionId(sessionId);
+        workExperience.setContent(content);
+
         dataService.saveWorkExperience(workExperience);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(workExperience);
+    }
+
+    @PatchMapping("/work-experiences")
+    public ResponseEntity<WorkExperience> updateWorkExperience(
+            @RequestParam String sessionId,
+            @RequestParam int workExperienceId,
+            @RequestParam String content
+    ) {
+        try {
+            WorkExperience updated = dataService.updateWorkExperience(sessionId, workExperienceId, content);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @DeleteMapping("/work-experiences")
+    public ResponseEntity<Void> deleteWorkExperience(
+            @RequestParam String sessionId,
+            @RequestParam int workExperienceId
+    ) {
+        try {
+            dataService.deleteWorkExperience(sessionId, workExperienceId);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/uploaded-files")
     public ResponseEntity<?> getUploadedFiles (@RequestParam("sessionId") String sessionId)
     {
-        // do processing - remove store location or mask it
         return ResponseEntity.ok( dataService.getFiles(sessionId)
                 .stream().map(
                         (item) ->

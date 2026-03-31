@@ -101,5 +101,6 @@ public class LocalFileStorageService
                 return FileVisitResult.CONTINUE;
             }
         });
+        Files.delete(normalizedFolderPath);
     }
 }

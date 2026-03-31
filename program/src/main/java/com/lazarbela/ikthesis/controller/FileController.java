@@ -18,14 +18,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-// File storage controller for uploads and downloads
-//local file store: ./files
-//remote file store (maybe @casabellanas.synology.me file server hosted by me)
-
 @AllArgsConstructor
 @RestController
-@RequestMapping("api/v1/files")
+@RequestMapping("/api/v1/files")
 public class FileController {
+
     private final FileService fileService;
 
     @PostMapping("/upload")

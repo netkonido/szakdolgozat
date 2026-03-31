@@ -14,8 +14,12 @@ public class OtherField {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @NonNull
     private String content;
-    @NonNull
     private String sessionId;
+
+    public OtherField (String sessionId, String content)
+    {
+        this.content = content;
+        this.sessionId = sessionId;
+    }
 }
