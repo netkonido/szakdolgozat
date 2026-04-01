@@ -92,7 +92,13 @@ Háromrétegű
 
 \subsection{Adatbázis}
 
-Mivel az adatok perzisztens tárolására nincsen szükség, ezért nem létfontosságú olyan adatbázis megvalósítást választani, ami a program leállítása után is tárolja az adatokat. A Spring Boot keretrendszer lehetőséget nyújt különböző könyvtárak és programcsomagok egyszerű beépítésére az Apache Maven fordítási környezeten keresztül. A H2 adatbázist választottam megvalósításra, mivel ez egy gyors és kis méretű memórián belüli adatbázisrendszer, ami automatikusan konfigurálódik a Spring Boot rendszerben. Számításba vettem emellett a MySQL-t és a Redis-t is, viszont a MySQL külön szerver futtatását igényli, a Redis konfigurációját pedig manuálisan kell elvégezni. Mivel a programot objektumelvű programozási nyelvben készítem, ezért kézenfekvő volt a tárolandó adatokat egyedekként definiálni. Az adatbázis egyed-kapcsolat diagramja 
+Mivel az adatok perzisztens tárolására nincsen szükség, ezért nem létfontosságú olyan adatbázis megvalósítást választani, ami a program leállítása után is tárolja az adatokat. A Spring Boot keretrendszer lehetőséget nyújt különböző könyvtárak és programcsomagok egyszerű beépítésére az Apache Maven fordítási környezeten keresztül. A H2 adatbázist választottam megvalósításra, mivel ez egy gyors és kis méretű memórián belüli adatbázisrendszer, ami automatikusan konfigurálódik a Spring Boot rendszerben. Számításba vettem emellett a MySQL-t és a Redis-t is, viszont a MySQL külön szerver futtatását igényli, a Redis konfigurációját pedig manuálisan kell elvégezni. Mivel a programot objektumelvű programozási nyelvben készítem, ezért kézenfekvő volt az adatbázist egy egyed-kapcsolat diagrammal ábrázolni.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/EntityRelationshipDiagram}
+    \caption{Az adatbázis egyed-kapcsolat diagramja}
+    \label{fig:entityrelationshipdiagram}
+\end{figure}
 
 
 
