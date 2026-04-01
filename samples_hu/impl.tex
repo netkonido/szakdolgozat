@@ -92,30 +92,14 @@ Háromrétegű
 
 \subsection{Adatbázis}
 
-Mivel az adatok perzisztens tárolására nincsen szükség, ezért nem létfontosságú olyan adatbázis megvalósítást választani, ami a program leállítása után is tárolja az adatokat. A Spring Boot keretrendszer lehetőséget nyújt különböző könyvtárak és programcsomagok egyszerű beépítésére az Apache Maven fordítási környezeten keresztül. A H2 adatbázist választottam megvalósításra, mivel ez egy gyors és kis méretű memórián belüli adatbázisrendszer, ami automatikusan konfigurálódik a Spring Boot rendszerben. Számításba vettem emellett a MySQL-t és a Redis-t is, viszont a MySQL külön szerver futtatását igényli, a Redis konfigurációját pedig manuálisan kell elvégezni. Mivel a programot objektumelvű programozási nyelvben készítem, ezért kézenfekvő volt az adatbázist egy egyed-kapcsolat diagrammal ábrázolni.
-\begin{figure}
+Mivel az adatok perzisztens tárolására nincsen szükség, ezért nem létfontosságú olyan adatbázis megvalósítást választani, aminek aadttartalma a program leállítása után is megmarad. Ugyan a prgram működése során használt adatokat lokális változókban is lehetne tárolni, egy adatbázisrendszer implementálása több lehetőséget nyújthat a jövőbeli fejlesztésekre tekintettel, ezért azt a tervezési döntést hoztam, hogy egy lokális adatbázist használok. Mivel a programot objektumelvű programozási nyelvben készítem, ezért kézenfekvő az adatbázis felépítését egyed-kapcsolat diagrammal (\ref{fig:entityrelationshipdiagram}. ábra) ábrázolni. Ezt lehetséges transzformációkkal relációs sémába átültetni, 
+
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\linewidth]{images/EntityRelationshipDiagram}
+    \includegraphics[width=\linewidth, frame]{images/EntityRelationshipDiagram}
     \caption{Az adatbázis egyed-kapcsolat diagramja}
     \label{fig:entityrelationshipdiagram}
 \end{figure}
-
-
-
-\begin{itemize}
-    \item Felhasználói adat
-    \begin{itemize}
-        \item Név
-        \item Email cím
-        \item Telefonszám
-        \item Tanulmány adat
-        \item Munkatapasztalat adat
-        \item Képzettség adat
-        \item Egyéb adat
-    \end{itemize}
-    \item Álláshirdetés adat
-    \item File
-\end{itemize}
 
 \subsection{Felhasználói felület}
 
@@ -170,5 +154,13 @@ Az API sémája
 \end{itemize}
 
 \section{Megvalósítás}
+
+ A Spring Boot keretrendszer lehetőséget nyújt különböző programcsomagok és modulok egyszerű beépítésére, illetve az Apache Maven fordítási környezeten keresztül egyszerűen kezelhetjük ezeket a programcsomag függőségeket és importálásokat. 
+
+\subsection{Adatbázis}
+
+Az adatbázis megvalósítására a H2 adatbázist választottam, mivel ez egy gyors és kis méretű memórián belüli adatbázisrendszer, ami elég elterjedt a Spring Boot-ot használó alkalmazásokban. Számításba vettem emellett a MySQL-t és a Redis-t is, viszont a MySQL külön szerver futtatását igényli, a Redis konfigurációját pedig manuálisan kell elvégezni, ezért nem ezeket választottam.
+
+ Mivel a H2 egy relációs adatbázis, a programban pedig egyedeket hozok létre és kezelek, szükség van egy Object-Relational Mapper-re, ami az egyedeken végzett műveleteket átalakítja SQL lekérdezéseké, majd ezekkel végzi el a kívánt műveleteket az adatbázisban. A megvalósításban a Jakarta Persistence API-t implementáló Hibernate keretrendszert használtam, ami szintén a Spring Boot-ba beépülő modulok közé tartozik, ezért minimális konfigurációt igényelt.
 
 \section{Tesztelés}
