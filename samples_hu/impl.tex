@@ -19,7 +19,7 @@ A program webalkalmazás formájában legyen elérhető modern webböngészőbő
 
 A felhasználó tudjon több módon adatokat bevinni.
 
-\begin{enumerate}
+\begin{itemize}
     
     \item LinkedIn hivatkozás megadásával
 
@@ -33,21 +33,11 @@ A felhasználó tudjon fileokat feltölteni. A feltöltött fileok lehetnek szö
 
 A felhasználó tudjon manuálisan adatokat megadni. A bevitt szöveges adatok tartalmát a felhasználó tudja kategorizálni legördülő listából való kiválasztással, vagy egyéb esetben kézi megadással. 
 
-\end{enumerate} 
+\end{itemize} 
 
 \paragraph{Állás specifikálása:}
 
-\begin{enumerate}
-    
-    \item Hivatkozással: 
-    
-    A felhasználó tudja megadni az álláshirdetéshez mutató hivatkozást. A program mesterséges intelligencia segítségével automatikusan ismerje fel és töltse be az álláshirdetésben szereplő követelményeket és releváns információkat. A felhasználó tudja szerkeszteni a mesterséges intelligencia által kinyert információkat.
-    
-    \item Manuálisan:
-
-    A felhasználó tudja megadni az álláshirdetés részleteit szöveges mezőben való kézi bevitelen keresztül.
-
-\end{enumerate}
+A felhasználó tudja megadni az álláshirdetéshez tartozó leírást. Ha a felhasználó egy hivatkozást ad meg, a program mesterséges intelligencia segítségével automatikusan ismerje fel és töltse be az álláshirdetésben szereplő követelményeket és releváns információkat. A felhasználó tudja szerkeszteni a mesterséges intelligencia által kinyert információkat.
 
 \paragraph{Visszalépés:}
 
@@ -62,7 +52,7 @@ Az program generáljon mesterséges intelligencia segítségével egy önéletra
 
 A felhasználó tudja letölteni az önéletrajzot. A felhasználó tudja kiválasztani a formátumot, amiben letölti az önéletrajzot.
 
-\paragraph{Kilépés}
+\paragraph{Kilépés:}
 
 A felhasználó tudjon kilépni az alkalmazásból a böngészőablak bezárásával. A felhasználó tudja megszakítani a munkamenetet a folyamat akármelyik lépése közben. A program lépjen vissza a kezdőképernyőre a munkamenet megszakítása után.
 
@@ -81,23 +71,6 @@ Az program lássa el egyedi azonosítóval az új munkameneteket. A program az a
 A program ne tárolja perzisztensen a felhasználó által megadott adatokat és feltöltött fileokat. A program elindításakor az adatbázis inicializálódjon üres állapotba. Az adatbázisban csak az aktív munkamenetekhez köthető adatok kerüljenek tárolásra. A munkamenet megszakítása után a munkamenethez kapcsolódó tárolt adatok törlődjenek.
 
 
-\paragraph{Maybe}
-
-\begin{itemize}
-    \item MI-vel kapcsolatos dolgok
-    \begin{itemize}
-        \item Hallucináció elkerülése
-        \item Adatbiztonság
-        \item Követelmények beépítése
-        \item Promptok specifikálása
-        \item Ügynökhálózatok
-        \item beépített optimalizációk
-    \end{itemize}
-    \item Önéletrajz kritériumok
-    \item Formai kritériumok
-    \item Kimeneti formátum
-\end{itemize}
-
 \subsection{Megszorítások}
 
 \begin{itemize} 
@@ -115,11 +88,14 @@ Felhasználói történetek
 
 \subsection{Architektúra}
 
-A spring boot alkalmazás architektúrájának leírása
+Háromrétegű
 
 \subsection{Adatbázis}
 
-A működés közben szükséges adatokat egy lokális, memóriában létező adatbázisban tárolja a program. Ez az adatbázis a program bezárásakor törlődik. A tárolt adatok típusai a következőek lehetnek:
+Mivel az adatok perzisztens tárolására nincsen szükség, ezért nem létfontosságú olyan adatbázis megvalósítást választani, ami a program leállítása után is tárolja az adatokat. A Spring Boot keretrendszer lehetőséget nyújt különböző könyvtárak és programcsomagok egyszerű beépítésére az Apache Maven fordítási környezeten keresztül. A H2 adatbázist választottam megvalósításra, mivel ez egy gyors és kis méretű memórián belüli adatbázisrendszer, ami automatikusan konfigurálódik a Spring Boot rendszerben. Számításba vettem emellett a MySQL-t és a Redis-t is, viszont a MySQL külön szerver futtatását igényli, a Redis konfigurációját pedig manuálisan kell elvégezni. Mivel a programot objektumelvű programozási nyelvben készítem, ezért kézenfekvő volt a tárolandó adatokat egyedekként definiálni. Az adatbázis egyed-kapcsolat diagramja 
+
+
+
 \begin{itemize}
     \item Felhasználói adat
     \begin{itemize}
