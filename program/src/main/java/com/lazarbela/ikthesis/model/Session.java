@@ -16,15 +16,15 @@ public class Session {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String sessionId;
 
-    @NonNull
-    private String secret;
-
-    @NonNull
     private Instant timestamp;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "userData_id", referencedColumnName = "id")
     private UserData userData;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "jobDescription_id", referencedColumnName = "id")
+    private JobDescription jobDescription;
 
     @Singular
     @OneToMany

@@ -180,6 +180,26 @@ public class DataService {
         return  workExperienceToDelete.get();
     }
 
+    public JobDescription getJobDescription (String sessionId)
+    {
+        return
+    }
+
+    public JobDescription saveJobDescription (String sessionId)
+    {
+
+    }
+
+    public JobDescription updateJobDescription (String sessionId)
+    {
+
+    }
+
+    public JobDescription deleteJobDescription (String sessionId)
+    {
+
+    }
+
     public UserData getUserData (String sessionId)
     {
         return userDataRepository.findBySessionId(sessionId);
