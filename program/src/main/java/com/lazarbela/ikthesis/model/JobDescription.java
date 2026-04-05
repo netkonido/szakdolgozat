@@ -14,15 +14,14 @@ public class JobDescription {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String content;
-    private String sessionId;
 
     @OneToOne(mappedBy = "jobDescription")
     private Session session;
 
 
-    public JobDescription(String sessionId, String content)
+    public JobDescription(Session session, String content)
     {
-        this.sessionId = sessionId;
         this.content = content;
+        this.session = session;
     }
 }

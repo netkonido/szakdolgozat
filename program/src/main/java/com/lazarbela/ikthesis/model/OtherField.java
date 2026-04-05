@@ -1,9 +1,6 @@
 package com.lazarbela.ikthesis.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Data
@@ -15,11 +12,15 @@ public class OtherField {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String content;
-    private String sessionId;
 
-    public OtherField (String sessionId, String content)
+    @ManyToOne
+    @JoinColumn(name="session_sessionId", nullable = false)
+    private Session session;
+
+
+    public OtherField (Session session, String content)
     {
         this.content = content;
-        this.sessionId = sessionId;
+        this.session = session;
     }
 }

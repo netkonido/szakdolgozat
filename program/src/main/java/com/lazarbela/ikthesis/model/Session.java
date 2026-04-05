@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -27,23 +28,23 @@ public class Session {
     private JobDescription jobDescription;
 
     @Singular
-    @OneToMany
-    private List<Certification> certifications;
+    @OneToMany(mappedBy = "session")
+    private Set<Certification> certifications;
 
     @Singular
-    @OneToMany
-    private List<Education> educations;
+    @OneToMany(mappedBy = "session")
+    private Set<Education> educations;
 
     @Singular
-    @OneToMany
-    private List<FileMetadata> files;
+    @OneToMany(mappedBy = "session")
+    private Set<FileMetadata> files;
 
     @Singular
-    @OneToMany
-    private List<OtherField> otherFields;
+    @OneToMany(mappedBy = "session")
+    private Set<OtherField> otherFields;
 
     @Singular
-    @OneToMany
-    private List<WorkExperience> workExperiences;
+    @OneToMany(mappedBy = "session")
+    private Set<WorkExperience> workExperiences;
 
 }

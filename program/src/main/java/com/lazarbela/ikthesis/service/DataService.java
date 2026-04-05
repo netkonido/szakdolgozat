@@ -5,6 +5,7 @@ import com.lazarbela.ikthesis.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.print.attribute.standard.MediaSize;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,9 +19,10 @@ public class DataService {
     SessionRepository sessionRepository;
     UserDataRepository userDataRepository;
     WorkExperienceRepository workExperienceRepository;
+    JobDescriptionRepository jobDescriptionRepository;
 
     @Autowired
-    public DataService (CertificationRepository cr, EducationRepository er, FileMetadataRepository fmr, OtherFieldRepository ofr, SessionRepository sr, UserDataRepository udr, WorkExperienceRepository wer)
+    public DataService (CertificationRepository cr, EducationRepository er, FileMetadataRepository fmr, OtherFieldRepository ofr, SessionRepository sr, UserDataRepository udr, WorkExperienceRepository wer, JobDescriptionRepository jdr)
     {
         certificationRepository = cr;
         educationRepository = er;
@@ -29,11 +31,22 @@ public class DataService {
         sessionRepository = sr;
         userDataRepository = udr;
         workExperienceRepository = wer;
+        jobDescriptionRepository = jdr;
     }
 
+    public Certification getCertification (int certificationId)
+    {
+        Optional<Certification> certification = certificationRepository.findById(certificationId);
+        if(certification.isEmpty())
+            throw new IllegalArgumentException("Certification id not found");
+        return certification.get();
+    }
     public List<Certification> getCertifications (String sessionId)
     {
-        return certificationRepository.findBySessionId(sessionId);
+        Optional<Session> session = sessionRepository.findById(sessionId);
+        if(session.isEmpty())
+            throw new IllegalArgumentException("Session id not found");
+        return session.get().getCertifications();
     }
 
     public Certification saveCertification (Certification certification)
@@ -69,9 +82,21 @@ public class DataService {
         return  certificationToDelete.get();
     }
 
+    public Education getEducation(int educationId)
+    {
+        Optional<Education> education = educationRepository.findById(educationId);
+        if(education.isEmpty())
+            throw new IllegalArgumentException("Education id not found");
+
+        return education.get();
+    }
+
     public List<Education> getEducations (String sessionId)
     {
-        return educationRepository.findBySessionId(sessionId);
+        Optional<Session> session = sessionRepository.findById(sessionId);
+        if(session.isEmpty())
+            throw new IllegalArgumentException("Session id not found");
+        return session.get().getEducations();
     }
 
     public Education saveEducation (Education education)
@@ -106,9 +131,21 @@ public class DataService {
         return  educationToDelete.get();
     }
 
+    public OtherField getOtherField (int otherFieldId)
+    {
+        Optional<OtherField> otherField = otherFieldRepository.findById(otherFieldId);
+        if(otherField.isEmpty())
+            throw new IllegalArgumentException("Other Field id not found");
+
+        return otherField.get();
+    }
+
     public List<OtherField> getOtherFields (String sessionId)
     {
-        return otherFieldRepository.findBySessionId(sessionId);
+        Optional<Session> session = sessionRepository.findById(sessionId);
+        if(session.isEmpty())
+            throw new IllegalArgumentException("Session id not found");
+        return session.get().getOtherFields();
     }
 
     public OtherField saveOtherField (OtherField otherField)
@@ -143,9 +180,20 @@ public class DataService {
         return  otherFieldToDelete.get();
     }
 
+    public WorkExperience getWorkExperience (int workExperienceId)
+    {
+        Optional<WorkExperience> workExperience = workExperienceRepository.findById(workExperienceId);
+        if(workExperience.isEmpty())
+            throw new IllegalArgumentException("Work Experience id not found");
+        return workExperience.get();
+    }
+
     public List<WorkExperience> getWorkExperiences (String sessionId)
     {
-        return workExperienceRepository.findBySessionId(sessionId);
+        Optional<Session> session = sessionRepository.findById(sessionId);
+        if(session.isEmpty())
+            throw new IllegalArgumentException("Session id not found");
+        return session.get().getWorkExperiences();
     }
 
     public WorkExperience saveWorkExperience (WorkExperience workExperience)
@@ -182,27 +230,50 @@ public class DataService {
 
     public JobDescription getJobDescription (String sessionId)
     {
-        return
+        Optional<Session> session = sessionRepository.findById(sessionId);
+        if(session.isEmpty())
+            throw new IllegalArgumentException("Session id not found");
+        return session.get().getJobDescription();
     }
 
-    public JobDescription saveJobDescription (String sessionId)
+    public JobDescription saveJobDescription (JobDescription jobDescription)
     {
-
+        return jobDescriptionRepository.save(jobDescription);
     }
 
-    public JobDescription updateJobDescription (String sessionId)
+    public JobDescription updateJobDescription (String sessionId, int jobDescriptionId, String newContent)
     {
+        Optional<JobDescription> jobDescriptionToModify = jobDescriptionRepository.findById(jobDescriptionId);
+        if(jobDescriptionToModify.isEmpty())
+            throw new IllegalArgumentException("Job Description id not found");
 
+        if(!jobDescriptionToModify.get().getSession().getSessionId().equals(sessionId))
+            throw new SecurityException();
+
+        jobDescriptionToModify.get().setContent(newContent);
+
+        return jobDescriptionToModify.get();
     }
 
-    public JobDescription deleteJobDescription (String sessionId)
+    public JobDescription deleteJobDescription (String sessionId, int jobDescriptionId)
     {
+        Optional<JobDescription> jobDescriptionToDelete = jobDescriptionRepository.findById(jobDescriptionId);
+        if(jobDescriptionToDelete.isEmpty())
+            throw new IllegalArgumentException("Job Description id not found");
 
+        if(!jobDescriptionToDelete.get().getSession().getSessionId().equals(sessionId))
+            throw new SecurityException();
+
+        jobDescriptionRepository.delete(jobDescriptionToDelete.get());
+        return jobDescriptionToDelete.get();
     }
 
     public UserData getUserData (String sessionId)
     {
-        return userDataRepository.findBySessionId(sessionId);
+        Optional<Session> session = sessionRepository.findById(sessionId);
+        if(session.isEmpty())
+            throw new IllegalArgumentException("Session id not found");
+        return session.get().getUserData();
     }
 
     public UserData saveUserData (UserData userData)
@@ -235,6 +306,9 @@ public class DataService {
 
     public List<FileMetadata> getFiles (String sessionId)
     {
-        return fileMetadataRepository.findBySessionId(sessionId);
+        Optional<Session> session = sessionRepository.findById(sessionId);
+        if(session.isEmpty())
+            throw new IllegalArgumentException("Session id not found");
+        return session.get().getFiles();
     }
 }

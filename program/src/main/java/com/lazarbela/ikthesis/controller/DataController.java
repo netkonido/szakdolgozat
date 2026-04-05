@@ -3,8 +3,6 @@ package com.lazarbela.ikthesis.controller;
 import com.lazarbela.ikthesis.model.*;
 import com.lazarbela.ikthesis.service.DataService;
 import lombok.AllArgsConstructor;
-import org.apache.catalina.User;
-import org.hibernate.jdbc.Work;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +22,9 @@ public class DataController {
     private final DataService dataService;
 
     @GetMapping("/session")
-    public ResponseEntity<?> getSessionInformation (@RequestParam("sessionId") String sessionId)
+    public ResponseEntity<?> getSession(@RequestParam("sessionId") Optional<String> sessionId)
     {
+
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
     }
 
@@ -98,8 +97,6 @@ public class DataController {
             @RequestParam("content") String content)
     {
         Certification certification = new Certification();
-
-        certification.setSessionId(sessionId);
         certification.setContent(content);
 
         dataService.saveCertification(certification);
@@ -145,8 +142,6 @@ public class DataController {
             @RequestParam("content") String content)
     {
         Education education = new Education();
-
-        education.setSessionId(sessionId);
         education.setContent(content);
 
         dataService.saveEducation(education);
@@ -193,7 +188,6 @@ public class DataController {
     {
         OtherField otherField = new OtherField();
 
-        otherField.setSessionId(sessionId);
         otherField.setContent(content);
 
         dataService.saveOtherField(otherField);
@@ -240,7 +234,6 @@ public class DataController {
     {
         WorkExperience workExperience = new WorkExperience();
 
-        workExperience.setSessionId(sessionId);
         workExperience.setContent(content);
 
         dataService.saveWorkExperience(workExperience);
