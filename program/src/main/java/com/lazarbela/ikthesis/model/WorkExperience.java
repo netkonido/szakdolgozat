@@ -2,7 +2,6 @@ package com.lazarbela.ikthesis.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.jdbc.Work;
 
 @Data
 @NoArgsConstructor

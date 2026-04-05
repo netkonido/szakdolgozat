@@ -15,22 +15,21 @@ public class UserData {
     private String emailAddress;
     private String telephoneNumber;
 
-    private String sessionId;
 
     @OneToOne(mappedBy = "userData")
     private Session session;
 
-    public UserData (String sessionId, String name, String emailAddress, String telephoneNumber)
+    public UserData (Session session, String name, String emailAddress, String telephoneNumber)
     {
-        this.sessionId = sessionId;
+        this.session = session;
         this.name = name;
         this.emailAddress = emailAddress;
         this.telephoneNumber = telephoneNumber;
     }
 
-    public UserData (String sessionId, String name, String emailAddress)
+    public UserData (Session session, String name, String emailAddress)
     {
-        this.sessionId = sessionId;
+        this.session = session;
         this.name = name;
         this.emailAddress = emailAddress;
     }

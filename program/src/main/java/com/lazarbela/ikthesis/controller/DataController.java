@@ -7,25 +7,35 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/data")
 public class DataController {
 
-    //TODO: DELETE mappings
-    //TODO: UPDATE mappings
-
     private final DataService dataService;
 
     @GetMapping("/session")
     public ResponseEntity<?> getSession(@RequestParam("sessionId") Optional<String> sessionId)
     {
-
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        if(sessionId.isEmpty())
+        {
+            return ResponseEntity.ok(dataService.newSession());
+        }
+        else{
+            Session session;
+            try{
+                session = dataService.getSessionById(sessionId.get());
+            }
+            catch (IllegalArgumentException e)
+            {
+                return ResponseEntity.badRequest().build();
+            }
+            return ResponseEntity.ok(session);
+        }
     }
 
     @GetMapping("/user-data")
@@ -43,14 +53,15 @@ public class DataController {
     {
         try
         {
+            Session session = dataService.getSessionById(sessionId);
             UserData newUserData;
             if(telephone.isPresent())
             {
-                newUserData = dataService.saveUserData(new UserData(sessionId, name, email, telephone.get()));
+                newUserData = dataService.saveUserData(new UserData(session, name, email, telephone.get()));
             }
             else
             {
-                newUserData = dataService.saveUserData(new UserData(sessionId, name, email));
+                newUserData = dataService.saveUserData(new UserData(session, name, email));
             }
             return ResponseEntity.ok(newUserData);
         }
@@ -86,7 +97,7 @@ public class DataController {
     }
 
     @GetMapping("/certifications")
-    public List<Certification> getCertifications (@RequestParam("sessionId") String sessionId)
+    public Set<Certification> getCertifications (@RequestParam("sessionId") String sessionId)
     {
         return dataService.getCertifications(sessionId);
     }
@@ -96,8 +107,18 @@ public class DataController {
             @RequestParam("sessionId") String sessionId,
             @RequestParam("content") String content)
     {
+        Session session;
+        try{
+            session = dataService.getSessionById(sessionId);
+        }
+        catch (IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().build();
+        }
+
         Certification certification = new Certification();
         certification.setContent(content);
+        certification.setSession(session);
 
         dataService.saveCertification(certification);
         return ResponseEntity.ok(certification);
@@ -131,7 +152,7 @@ public class DataController {
     }
 
     @GetMapping("/educations")
-    public List<Education> getEducations (@RequestParam("sessionId") String sessionId)
+    public Set<Education> getEducations (@RequestParam("sessionId") String sessionId)
     {
         return dataService.getEducations(sessionId);
     }
@@ -141,8 +162,18 @@ public class DataController {
             @RequestParam("sessionId") String sessionId,
             @RequestParam("content") String content)
     {
+        Session session;
+        try{
+            session = dataService.getSessionById(sessionId);
+        }
+        catch (IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().build();
+        }
+
         Education education = new Education();
         education.setContent(content);
+        education.setSession(session);
 
         dataService.saveEducation(education);
         return ResponseEntity.ok(education);
@@ -176,19 +207,28 @@ public class DataController {
     }
 
     @GetMapping("/other-fields")
-    public List<OtherField> getOtherFields (@RequestParam("sessionId") String sessionId)
+    public Set<OtherField> getOtherFields (@RequestParam("sessionId") String sessionId)
     {
         return dataService.getOtherFields(sessionId);
     }
 
     @PostMapping("/other-fields")
-    public ResponseEntity<OtherField> postOtherFields (
+    public ResponseEntity<OtherField> postOtherField (
             @RequestParam("sessionId") String sessionId,
             @RequestParam("content") String content)
     {
-        OtherField otherField = new OtherField();
+        Session session;
+        try{
+            session = dataService.getSessionById(sessionId);
+        }
+        catch (IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().build();
+        }
 
+        OtherField otherField = new OtherField();
         otherField.setContent(content);
+        otherField.setSession(session);
 
         dataService.saveOtherField(otherField);
         return ResponseEntity.ok(otherField);
@@ -222,19 +262,28 @@ public class DataController {
     }
 
     @GetMapping("/work-experiences")
-    public List<WorkExperience> getWorkExperiences (@RequestParam("sessionId") String sessionId)
+    public Set<WorkExperience> getWorkExperiences (@RequestParam("sessionId") String sessionId)
     {
         return dataService.getWorkExperiences(sessionId);
     }
 
     @PostMapping("/work-experiences")
-    public ResponseEntity<WorkExperience> getWorkExperiences (
+    public ResponseEntity<WorkExperience> postWorkExperience (
             @RequestParam("sessionId") String sessionId,
             @RequestParam("content") String content)
     {
-        WorkExperience workExperience = new WorkExperience();
+        Session session;
+        try{
+            session = dataService.getSessionById(sessionId);
+        }
+        catch (IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().build();
+        }
 
+        WorkExperience workExperience = new WorkExperience();
         workExperience.setContent(content);
+        workExperience.setSession(session);
 
         dataService.saveWorkExperience(workExperience);
         return ResponseEntity.ok(workExperience);
@@ -270,7 +319,16 @@ public class DataController {
     @GetMapping("/uploaded-files")
     public ResponseEntity<?> getUploadedFiles (@RequestParam("sessionId") String sessionId)
     {
-        return ResponseEntity.ok( dataService.getFiles(sessionId)
+        Set<FileMetadata> files;
+        try{
+            files = dataService.getFiles(sessionId);
+        }
+        catch (IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok(files
                 .stream().map(
                         (item) ->
                                 Map.ofEntries(

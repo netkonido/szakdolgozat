@@ -6,6 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface JobDescriptionRepository extends JpaRepository<JobDescription, Integer> {
-    JobDescription findBySessionId(String sessionId);
-    boolean existsBySessionId(String sessionId);
 }

@@ -1,18 +1,14 @@
 package com.lazarbela.ikthesis.service;
 
-import com.lazarbela.ikthesis.model.FileMetadata;
+import com.lazarbela.ikthesis.model.Session;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 
-import javax.naming.directory.BasicAttributes;
 import java.io.*;
 import java.nio.file.*;
-import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Comparator;
-import java.util.List;
 import java.util.UUID;
 
 @Service

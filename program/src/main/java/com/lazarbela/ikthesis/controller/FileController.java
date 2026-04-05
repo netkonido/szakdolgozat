@@ -2,11 +2,8 @@ package com.lazarbela.ikthesis.controller;
 
 import com.lazarbela.ikthesis.model.FileMetadata;
 import com.lazarbela.ikthesis.service.FileService;
-import jdk.jshell.spi.ExecutionControl;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @AllArgsConstructor
 @RestController
@@ -73,7 +71,7 @@ public class FileController {
         try
         {
             FileMetadata metadata = fileService.deleteFile(fileName);
-            if(!metadata.getSessionId().equals(sessionId))
+            if(!metadata.getSession().getSessionId().equals(sessionId))
             {
                 throw new SecurityException("Access denied.");
             }
@@ -89,7 +87,7 @@ public class FileController {
     {
         try
         {
-            List<FileMetadata> deletedFiles = fileService.deleteSessionFiles(sessionId);
+            Set<FileMetadata> deletedFiles = fileService.deleteSessionFiles(sessionId);
             return ResponseEntity.ok(deletedFiles.stream().map((item) -> Map.entry("fileName", item.getOriginalName())));
         }
         catch (IOException e)

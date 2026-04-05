@@ -1,8 +1,9 @@
 package com.lazarbela.ikthesis.service;
 
 import com.lazarbela.ikthesis.model.FileMetadata;
+import com.lazarbela.ikthesis.model.Session;
 import com.lazarbela.ikthesis.repository.FileMetadataRepository;
-import lombok.AllArgsConstructor;
+import com.lazarbela.ikthesis.repository.SessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -13,37 +14,41 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class FileService {
     private final FileStorageProperties properties;
     private final FileMetadataRepository repository;
     private final LocalFileStorageService storageService;
+    private final SessionRepository sessionRepository;
 
     @Autowired
-    public FileService(FileStorageProperties properties, FileMetadataRepository repository, LocalFileStorageService storageService)
+    public FileService(FileStorageProperties properties, FileMetadataRepository repository, LocalFileStorageService storageService, SessionRepository sessionRepository)
     {
         this.properties = properties;
         this. repository = repository;
         this.storageService = storageService;
+        this.sessionRepository = sessionRepository;
     }
 
     public FileMetadata uploadFile(MultipartFile file, String sessionId) throws IOException
     {
+        Optional<Session> session = sessionRepository.findById(sessionId);
+        if(session.isEmpty())
+            throw new IllegalArgumentException("Session id not found");
+
         validateFile(file);
 
         String storagePath;
         try(InputStream inputStream = file.getInputStream())
         {
-            storagePath = storageService.storeFile(inputStream, file.getOriginalFilename(), sessionId);
+            storagePath = storageService.storeFile(inputStream, file.getOriginalFilename(), session.get().getSessionId());
         }
 
         String fileName = storagePath.substring(storagePath.lastIndexOf(File.separator) + 1);
         FileMetadata metadata = FileMetadata.builder()
-                .sessionId(sessionId)
+                .session(session.get())
                 .timestamp(Instant.now())
                 .storedName(fileName)
                 .originalName(file.getOriginalFilename())
@@ -87,10 +92,14 @@ public class FileService {
         return metadata;
     }
 
-    public List<FileMetadata> deleteSessionFiles(String sessionId) throws IOException
+    public Set<FileMetadata> deleteSessionFiles(String sessionId) throws IOException
     {
-        List<FileMetadata> filesToDelete = repository.findBySessionId(sessionId);
-        List<FileMetadata> deletedFiles = new ArrayList<>();
+        Optional<Session> session = sessionRepository.findById(sessionId);
+        if(session.isEmpty())
+            throw new IllegalArgumentException("Session id not found");
+
+        Set<FileMetadata> filesToDelete = session.get().getFiles();
+        Set<FileMetadata> deletedFiles = new HashSet<>();
         for(FileMetadata metadata : filesToDelete)
         {
                 storageService.deleteFile(metadata.getStoredPath());
