@@ -38,6 +38,47 @@ public class DataController {
         }
     }
 
+    @GetMapping("/job-description")
+    public JobDescription getJobDescription (@RequestParam("sessionId") String sessionId)
+    {
+        return dataService.getJobDescription(sessionId);
+    }
+
+    @PostMapping("/job-description")
+    public ResponseEntity<JobDescription> postJobDescription (
+            @RequestParam("sessionId") String sessionId,
+            @RequestParam("content") String content)
+    {
+        Session session;
+        try{
+            session = dataService.getSessionById(sessionId);
+        }
+        catch (IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().build();
+        }
+
+        JobDescription jobDescription = new JobDescription();
+        jobDescription.setContent(content);
+        jobDescription.setSession(session);
+
+        dataService.saveJobDescription(jobDescription);
+        return ResponseEntity.ok(jobDescription);
+    }
+
+    @PatchMapping("/job-description")
+    public ResponseEntity<JobDescription> updateJobDescription(
+            @RequestParam String sessionId,
+            @RequestParam String content
+    ) {
+        try {
+            JobDescription updated = dataService.updateJobDescription(sessionId, content);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @GetMapping("/user-data")
     public UserData getUserData (@RequestParam("sessionId") String sessionId)
     {
@@ -89,13 +130,6 @@ public class DataController {
         }
     }
 
-    @DeleteMapping("/user-data")
-    public ResponseEntity<Void> deleteUserData(@RequestParam("sessionId") String sessionId)
-    {
-        dataService.deleteUserData(sessionId);
-        return ResponseEntity.noContent().build();
-    }
-
     @GetMapping("/certifications")
     public Set<Certification> getCertifications (@RequestParam("sessionId") String sessionId)
     {
@@ -133,7 +167,7 @@ public class DataController {
         try {
             Certification updated = dataService.updateCertification(sessionId, certificationId, content);
             return ResponseEntity.ok(updated);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
     }
