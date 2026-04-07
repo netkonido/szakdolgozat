@@ -1,5 +1,6 @@
 package com.lazarbela.ikthesis.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -17,8 +18,9 @@ public class FileMetadata {
     @Id
     private String storedName;
 
+    @JsonBackReference
     @ManyToOne
-    @JoinColumn(name="session_sessionId", nullable = false)
+    @JoinColumn(name="session_id", nullable = false)
     private Session session;
 
     private String originalName;

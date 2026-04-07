@@ -1,5 +1,6 @@
 package com.lazarbela.ikthesis.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +16,9 @@ public class JobDescription {
     private int id;
     private String content;
 
-    @OneToOne(mappedBy = "jobDescription")
+    @JsonBackReference
+    @OneToOne
+    @JoinColumn(name = "session_id", nullable = false)
     private Session session;
 
 

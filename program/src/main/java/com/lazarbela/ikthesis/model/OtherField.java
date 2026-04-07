@@ -1,5 +1,6 @@
 package com.lazarbela.ikthesis.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,8 +14,9 @@ public class OtherField {
     private int id;
     private String content;
 
+    @JsonBackReference
     @ManyToOne
-    @JoinColumn(name="session_sessionId", nullable = false)
+    @JoinColumn(name="session_id", nullable = false)
     private Session session;
 
 

@@ -56,6 +56,7 @@ public class DataService {
     public Certification updateCertification (String sessionId, int certificationId, String newContent)
     {
         Optional<Certification> certificationToModify = certificationRepository.findById(certificationId);
+
         if(certificationToModify.isEmpty())
             throw new IllegalArgumentException("Certification id not found");
 
@@ -266,7 +267,6 @@ public class DataService {
             throw new IllegalArgumentException("Job Description not set");
 
         jobDescriptionRepository.delete(jobDescriptionToDelete);
-        session.get().setJobDescription(null);
 
         return jobDescriptionToDelete;
     }
@@ -314,7 +314,6 @@ public class DataService {
             throw new IllegalArgumentException("User data not set");
 
         userDataRepository.delete(userDataToDelete);
-        session.get().setUserData(null);
         return userDataToDelete;
     }
 
@@ -335,6 +334,6 @@ public class DataService {
     }
     public Session newSession()
     {
-        return  sessionRepository.save(newSession());
+        return  sessionRepository.save(new Session());
     }
 }
