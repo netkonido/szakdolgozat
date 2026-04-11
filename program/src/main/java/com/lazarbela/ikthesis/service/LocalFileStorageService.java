@@ -1,6 +1,5 @@
 package com.lazarbela.ikthesis.service;
 
-import com.lazarbela.ikthesis.model.Session;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -90,7 +89,7 @@ public class LocalFileStorageService
     public void deleteSessionFolder(String sessionId) throws IOException
     {
         Path normalizedFolderPath = rootPath.resolve(sessionId).normalize();
-        Files.walkFileTree(normalizedFolderPath, new SimpleFileVisitor<Path>(){
+        Files.walkFileTree(normalizedFolderPath, new SimpleFileVisitor<>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 java.nio.file.Files.delete(file);
