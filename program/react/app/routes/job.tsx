@@ -1,5 +1,6 @@
 import type { Route } from "./+types/home";
 import { Link } from "react-router";
+import {TopBar} from "~/components/topBar";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -10,12 +11,17 @@ export function meta({}: Route.MetaArgs) {
 
 export default function JobDescription() {
     return (
-        <main>
-            <h1>Enter Job Description</h1>
-            <ul>
-                <li><Link to="/overview">Overview</Link></li>
-                <li><Link to="/end-session">End Session</Link></li>
-            </ul>
-        </main>
+        <div>
+            <TopBar
+                linkBack={"/data"}
+                title={"Álláshirdetés megadása"}
+            />
+            <div className="flex flex-col items-center bg-gray-400">
+                <textarea name="jobDescription" placeholder="Álláshirdetés megadása" className="border-black border-2 rounded-md w-1/2 bg-white m-10 h-30"></textarea>
+                <Link to="/overview">
+                    <button type="button" className="navbutton">
+                        Tovább</button></Link>
+            </div>
+        </div>
         );
 }

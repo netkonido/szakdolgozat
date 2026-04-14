@@ -10,9 +10,12 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Download() {
     return (
-        <main>
+        <div className="flex flex-col items-center">
             <h1>Download resume</h1>
-            <Link to="/end-session">End Session</Link>
-        </main>
+            <ul>
+                <li><Link to="/end-session">End Session</Link></li>
+            </ul>
+
+        </div>
         );
 }

@@ -10,12 +10,12 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Overview() {
     return (
-        <main>
+        <div className="flex flex-col items-center">
             <h1>Resume Overview</h1>
             <ul>
                 <li><Link to="/download">Download</Link></li>
                 <li><Link to="/end-session">End Session</Link></li>
             </ul>
-        </main>
+        </div>
         );
 }

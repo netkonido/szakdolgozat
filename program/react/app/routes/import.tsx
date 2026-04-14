@@ -1,5 +1,6 @@
 import type { Route } from "./+types/home";
 import { Link } from "react-router";
+import {TopBar} from "~/components/topBar";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -10,12 +11,20 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Import() {
     return (
-        <main>
-            <h1>Import Data</h1>
-            <ul>
-                <li><Link to="/data">Go Back</Link></li>
-                <li><Link to="/end-session">End Session</Link></li>
-            </ul>
-        </main>
+        <div>
+            <TopBar
+            linkBack={"/data"}
+            title={"Adatok Importálása"}
+            />
+            <div className="flex flex-col items-center bg-gray-400">
+                <h1 className="text-lime-400 text-5xl p-5 font-semibold">Adatok importálása</h1>
+                <Link to="/data">
+                    <button type="button" className="navbutton">
+                        Tovább</button></Link>
+                <Link to="/end-session">
+                    <button type="button" className="endsession">
+                        Munkamenet megszakítása</button></Link>
+            </div>
+        </div>
         );
 }
