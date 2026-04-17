@@ -9,6 +9,13 @@ A feladat egy webalkalmazás fejlesztése ami személyre szabott önéletrajzoka
 
 \subsection{Funkcionális követelmények}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{images/UsecaseDiagram.eps}
+    \caption{Használati eset diagram}
+    \label{fig:usecasediagram}
+\end{figure}
+
 \paragraph{Megnyitás:}
 
 A program webalkalmazás formájában legyen elérhető modern webböngészőből\footnote{Google Chrome, Microsoft Edge, Safari, Mozzilla Firefox, Opera, Brave}. A böngészőben a [megfelelő elérési útvonal] keresősávba való beírása után jelenjen meg a nyitólap és automatikusan induljon el egy új munkamenet.
@@ -80,23 +87,21 @@ A program ne tárolja perzisztensen a felhasználó által megadott adatokat és
     \item A generatív mesterséges inelligenciát LangFlow keretrendszerben készített ügynökhálózaton keresztül kell elérni
 \end{itemize}
 
-\subsection{Használati esetek}
-
-Felhasználói történetek
-
 \section{Tervezés}
 
 \subsection{Architektúra}
 
-Háromrétegű
+A program háromrétegű architektúrában, lesz elkészítve, objektumelvű szemléletmóddal a fókuszban. A főbb rétegek a megjelenítési réteg (Presentation layer), az adatforrás (Data source), és az üzleti logika (Domain). A megjelenítési réteg feladata lesz többek közt a felhasználói interakciók kezelése, a bemeneti adatok ellenőrzése, és a munkamenetek azonosítóinak tárolása. Ez a réteg http kérések útján fog kommunikálni az üzleti logikával, ami egy reprezentációs állapotátviteli interfészt (REST API) biztosít a felhasználói felületnek. Az adatforrás fog felelni az adatbázis eléréséért és az objektum-relációs átalakításokért, az üzleti logika pedig a szükséges adattranszformációkért és a rétegek összekötéséért. Az üzleti logikából érdemes kiemelni a vezérlőket, amik az API hívásait fogják kezelni és az üzleti logika eljárásait fogják meghívni.
 
 \subsection{Adatbázis}
 
-Mivel az adatok perzisztens tárolására nincsen szükség, ezért nem létfontosságú olyan adatbázis megvalósítást választani, aminek aadttartalma a program leállítása után is megmarad. Ugyan a prgram működése során használt adatokat lokális változókban is lehetne tárolni, egy adatbázisrendszer implementálása több lehetőséget nyújthat a jövőbeli fejlesztésekre tekintettel, ezért azt a tervezési döntést hoztam, hogy egy lokális adatbázist használok. Mivel a programot objektumelvű programozási nyelvben készítem, ezért kézenfekvő az adatbázis felépítését egyed-kapcsolat diagrammal (\ref{fig:entityrelationshipdiagram}. ábra) ábrázolni. Ezt lehetséges transzformációkkal relációs sémába átültetni, 
+A funkcionális követelmények alapján az adatok perzisztens tárolására nincsen szükség, ezért nem létfontosságú olyan adatbázis megvalósítást választani, aminek adattartalma a program leállítása után is megmarad. Ugyan a prgram működése során használt adatokat lokális változókban is lehetne tárolni, egy adatbázisrendszer implementálása több lehetőséget nyújthat a jövőbeli fejlesztésekre tekintettel. Azt a tervezési döntést hoztam, hogy egy lokális, memórián belüli adatbázist használok az adatok tárolására, így a jövőben könnyen ki lehet cserélni egy másik adatbázisrendszerre az igények változása szerint.
+
+A Spring Boot keretrendszer lehetőséget nyújt az adatok objektumelvű kezelésére beépülő ORM-en keresztül, és automatikusan felépíti az adatbázissémát a program indításakor, ezért kézenfekvő az adatbázis felépítését egyed-kapcsolat diagrammal (\ref{fig:entityrelationshipdiagram}. ábra) modellezni. Ezt egy objektumelvű programozási nyelven egyszerű implementálni, hiszen az egyedek lesznek az osztályok, a bennük lévő mezők pedig az osztály adattagjai. Az egyedek közti kapcsolatokat az adatbázisban idegen kulcsokkal, míg a programszövegben a másik objektumra mutató referenciákkal valósítom meg. 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\linewidth, frame]{images/EntityRelationshipDiagram}
+    \includegraphics[width=0.9\linewidth, frame]{images/EntityRelationshipDiagram}
     \caption{Az adatbázis egyed-kapcsolat diagramja}
     \label{fig:entityrelationshipdiagram}
 \end{figure}
@@ -108,59 +113,92 @@ Az alkalmazásnak a következő oldalakat kell tartalmaznia
 \begin{enumerate}
     \item \textbf{Nyitólap:}
 
-Ez az oldal jelenik meg amikor a felhasználó megnyitja a webböngészőn keresztül az alkalmazást. Ezen az oldalon egy gomb van "Kezdés" felirattal.
+    Ez az oldal jelenik meg amikor a felhasználó megnyitja a webböngészőn keresztül az alkalmazást. Ezen az oldalon egy gomb telálható "Kezdés" felirattal.
     
     \item \textbf{Adatok bevitele:}
 
-    Az oldalon a felhasználó megadhatja az önéletrajz elkészítéséhez szükséges információkat. Az adatok csoportokra bontva adhatóak meg.
+    Az oldalon a felhasználó megadhatja az önéletrajz elkészítéséhez szükséges információkat. A felhasználó az adatait csoportokra bontva adhatja meg. A csoportok a következőek: alapadatok, tanulmányok, munkatapasztalatok, képesítések, és egyebek.
 
-    \begin{enumerate}
-        \item Alapadatok
-        \item Tanulmányok
-        \item Munkatapasztalat
-        \item Képesítések
-        \item Egyebek
-    \end{enumerate}
-
-    A felhasználó az alapadatait szövegdobozokban adhatja meg. A többi kategóriában csoportosítva láthatja az adatokat. A hozzáadás ikonra kattintva új elemet vehet fel, aminek tartalmát a megjelenő szövegdobozba való bevitellel adhatja meg. A bevitelt véglegesítheti a zöld pipára kattintva, elvetheti a piros "X"-re kattintva. A meglévő adatokat megváltoztathatja a szerkesztés ikonra kattintva, illetve törölheti a törlés ikonra kattintva. Amennyiben a felhasználó elégedett az adatokkal, a "Tovább gombra kattintva folytathatja a folyamatot.
+    A felhasználó az alapadatait szövegdobozokban adhatja meg, a többi kategóriában a hozzáadás ikonra kattintva új elemet vehet fel, aminek tartalmát a megjelenő szövegdobozba való bevitellel adhatja meg. A bevitelt véglegesítheti a zöld pipára kattintva, elvetheti a piros "X"-re kattintva. A meglévő adatokat megváltoztathatja a szerkesztés ikonra kattintva, illetve törölheti a törlés ikonra kattintva. Amennyiben a felhasználó elégedett az adatokkal, a "Tovább" gombra kattintva folytathatja a folyamatot.
 
     \item \textbf{Adatok importálása:}
 
-    Ezen az oladlon a felhasználó egy szövegdobozban megadhatja a LinkedIn profiljának linkjét vagy tölthet fel fileokat [drag-and-drop módszerrel vagy] a "File feltöltés" gomb megnyomásával, majd a megfelelő file kiválasztásával. A feltöltött fileok nevei egy listában jelennek meg. Legfeljebb 10 file feltöltésére van lehetősége a felhasználónak, ezt egy számláló jelzi a gombon.  Ha a felhasználó befejezte az adatbevitelt, a "Tovább" gombbal léphet a következő oldalra. Ekkor a feltöltött adatok feldolgozásra kerülnek a mesterséges intelligencia által, és az eredmény automatikusan betöltésre kerül az adatbázisba.
+    Ezen az oladlon a felhasználó egy szövegdobozban megadhatja a LinkedIn profiljának linkjét vagy tölthet fel fileokat a "File feltöltés" gomb megnyomásával, majd a megfelelő file kiválasztásával. A feltöltött fileok nevei egy listában jelennek meg. Legfeljebb 10 file feltöltésére van lehetősége a felhasználónak, ezt egy számláló jelzi a gombon.  Ha a felhasználó befejezte az adatbevitelt, a "Tovább" gombbal léphet a következő oldalra. Ekkor a feltöltött adatok feldolgozásra kerülnek a mesterséges intelligencia által, és az eredmény automatikusan betöltésre kerül az adatbázisba.
     
     \item \textbf{Álláshirdetés megadása:}
 
-    A felhasználó szöveges mezőn keresztül megadhatja az álláshirdetés részleteit, vagy az álláshirdetésre mutató hivatkozást. A hivatkozás megadása esetében a program mesterséges intelligenciával kinyeri a releváns információkat, és betölti a szöveges mezőbe, amit a felhasználó szerkeszthet a továbblépés előtt.
+    Itt a felhasználó egy szöveges mezőn keresztül megadhatja az álláshirdetés részleteit, vagy az álláshirdetésre mutató hivatkozást. A hivatkozás megadása esetében a program mesterséges intelligenciával kinyeri a releváns információkat, és betölti a szöveges mezőbe, amit a felhasználó szerkeszthet a továbblépés előtt. Amennyiben elégedett a leírással, a "Tovább" gombra nyomva elindíthatja az önéletrajz generálását.
     
     \item \textbf{Önéletrajz áttekintés:}
 
-    Az önéletrajz vázlat generálása után a felhasználó áttekintheti azt, és az "Újragenerálás" gombbal megismételheti a generálási folyamatot.
+    Az önéletrajz vázlat generálása után a felhasználó áttekintheti ezen az oldalon, és amennyiben nem megfelelő a vázlat, az "Újragenerálás" gombbal megismételheti a generálási folyamatot. Ha a vázlat megfelel a felhasználónak, a "Tovább" gombbal léphet a következő oldlra.
     
     \item \textbf{Letöltés:}
 
-    Amennyiben a felhasználó elégedett az eredménnyel, kiválaszthatja a kimeneti formátumot, majd letöltheti az önéletrajzát.
+    Ezen az oldalon a felhasználó kiválaszthatja a kimeneti formátumot a legördülő menüből, majd letöltheti az önéletrajzát a "Letöltés" gombra kattintva. A felhasználó az önéletrajza letöltése után megszakíthatja a munkamenetet, törölve az összes megadott információját.
     
 \end{enumerate}
 
 \subsection{API}
- 
-A felhasználói felület és az üzleti logika RESTful API-n keresztül kommunikál. Az api elérése http kéréseken keresztül lehetséges. - pongyola
+
+A felhasználói felület és az üzleti logika összekötésére egy API szolgál, ami lehetővé teszi a kliens és a szerver közti adatátvitelt.
 
 Az API sémája 
 
-\begin{itemize}
-    \item /data
-    \item /files
-\end{itemize}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{c|c|c}
+         & a \\
+         & c \\
+    \end{tabular}
+    \caption{API végpontok}
+    \label{tab:placeholder}
+\end{table}
+
+
+\subsection{Mesterséges intelligencia}
+
+\subsection{Egyebek}
 
 \section{Megvalósítás}
 
- A Spring Boot keretrendszer lehetőséget nyújt különböző programcsomagok és modulok egyszerű beépítésére, illetve az Apache Maven fordítási környezeten keresztül egyszerűen kezelhetjük ezeket a programcsomag függőségeket és importálásokat. 
+Az üzleti logika megvalósításához a \textbf{Spring Boot} keretrendszert választottam, mivel lehetőséget nyújt különböző programcsomagok és modulok egyszerű beépítésére. A program fordításához illetve a függőségek kezeléséhez az \textbf{Apache Maven} fordítási környezetet választottam. Az API kiszolgását egy \textbf{Apache Tomcat} webszerver végzi. A megjelenítési réteghez \textbf{React Routert} használtam, mivel ez egy közismert megoldás a modern webalkalmazások területén. Az általam választott React Router minta tartalmazta a \textbf{Tailwind CSS} bővítményt is, amivel a html címkék osztálynevének szerkesztésével egyszerűen lehet a felhasználói felület stílusparamétereit módosítani.
+
+\subsection{Üzleti Logika}
+
+A backend vázának generálásához a \href{https://start.spring.io/}{Spring Initializr}-t használtam. Ezen az oldalon ki tudtam választani mely függőségeket építem be a projektembe, melyik programnyelvet, Spring Boot verziót és Java verziót szeretném használni.
+
+Az alap készítése során a \texttt{Spring Data JPA}, \texttt{H2 Database}, \texttt{Lombok}, és \texttt{Spring Web} függőségeket adatam hozzá a projektemhez, továbbá \textbf{Maven} projektet, \textbf{Java} nyelvet, \textbf{Spring Boot 4.0.5} és \textbf{Java 26} verziót választottam. Ezekkel a beállításokkal a weboldal generál egy üres projektet a szükséges konfigurációs fileokkal, mapparendszerrel és belépési ponttal.
+
+Az alap generálása után létrehoztam a \texttt{model}, \texttt{repository}, \texttt{service}, és a \texttt{controller} mappákat, amik a projekt által használt java csomagok lesznek.
+
+\paragraph{Model csomag:\label{par:model}}
+
+Ez a csomag tartalmazza az adatbázis egyedeihez tartozó osztályokat. Ennek a csomagnak az osztálydiagramja nagy hasonlóságot hordoz az egyed-kapcsolat diagrammal (\ref{fig:entityrelationshipdiagram}. ábra). Egyes adattagok meg vannak jelölve a \mintinline{Java}{@JsonManagedReference} és \mintinline{Java}{@JsonBackReference} annotációval, mivel az objektumok az egyedek közti kapcsolatok miatt egymásra mutató körkörös referenciát alkotnak, és a Json szerializálás esetén végtelen rekurzív ciklusba kerül a program. 
+
+Bizonyos osztályok továbbá meg vannak jelölve a \mintinline{Java}{@Getter}, \mintinline{Java}{@Setter}, \mintinline{Java}{@NoArgsConstructor}, \mintinline{Java}{@AllArgsConstructor}, \mintinline{Java}{@Builder}, \mintinline{Java}{@Singular}, vagy \mintinline{Java}{@Data} annotációkkal, ezek a \texttt{Lombok} könyvtár sajátos jelölései, amivel a sokszor ismétlődő "Boilerplate" kódot kiváltahtjuk, mert ezeket automatikusan legenerálja a rendszer, ezzel tisztábbá és olvashatóbbá téve a kódot. A \texttt{Lombok} könyvtárról a \href{https://projectlombok.org/}{projectlombok.org} weboldalon olvashatnak többet
+
+\paragraph{Repository csomag: \label{par:repository}}
+Minden egyed osztályhoz tartozik egy adattároló, más néven repository. Ezek az interfészek a \texttt{JPARepository} minta interfészt bővítik ki, és a \texttt{Jakarta Persistence API}t megvalósító Hibernate keretrendszer által automatikusan kerülnek implementálásra. Minden ilyen interfész meg van jelölve a \mintinline{Java}{@Repository} annotávióval, és ezek valósítják meg a \mintinline{Java}{delete(T e)}, \mintinline{Java}{save(T e)}, és \mintinline{Java}{findById(U id)} metódusokat, amik használatával manipulálhatóak az adatbázisrekordok. Éretelem szerűen az egyedekhez tartozó interfészek ebben a csomagban találhatóak.
+
+\paragraph{Service csomag: \label{par:service}}
+
+Az üzleti logikában végzendő műveletekhez szükséges metódusokat szolgáltatásokon keresztül érhetjük el. Az adatbázison végzendő transzformációkat a \mintinline{Java}{DataService} osztályon keresztül végezhetjük. Ez a osztály köti össze a vezérlőket az adatbázissal, és valósítja meg az API által nyújtott végpontok háttérszámításait. Az API-n keresztüli file fel-, és letöltéseket a \mintinline{Java}{FileService}, a lokális tárolást pedig a \mintinline{Java}{LocalFileStorageService} osztály teszi lehetővé.
+
+\paragraph{Controller csomag: \label{par:controller}}
+
 
 \subsection{Adatbázis}
 
-Az adatbázis megvalósítására a H2 adatbázist választottam, mivel ez egy gyors és kis méretű memórián belüli adatbázisrendszer, ami elég elterjedt a Spring Boot-ot használó alkalmazásokban. Számításba vettem emellett a MySQL-t és a Redis-t is, viszont a MySQL külön szerver futtatását igényli, a Redis konfigurációját pedig manuálisan kell elvégezni, ezért nem ezeket választottam.
+Az adatbázis megvalósítására a \texttt{H2 adatbázis}t választottam, mivel ez egy gyors és könnyű memórián belüli adatbázisrendszer, ami elteredt a \texttt{Spring Boot}ot használó alkalmazásokban. Számításba vettem emellett a \texttt{MySQL}t és a \texttt{Redis}t is, viszont a \texttt{MySQL} külön szerver futtatását igényli, a \texttt{Redis} konfigurációját pedig manuálisan kell elvégezni, ezért nem ezeket választottam.
 
- Mivel a H2 egy relációs adatbázis, a programban pedig egyedeket hozok létre és kezelek, szükség van egy Object-Relational Mapper-re, ami az egyedeken végzett műveleteket átalakítja SQL lekérdezéseké, majd ezekkel végzi el a kívánt műveleteket az adatbázisban. A megvalósításban a Jakarta Persistence API-t implementáló Hibernate keretrendszert használtam, ami szintén a Spring Boot-ba beépülő modulok közé tartozik, ezért minimális konfigurációt igényelt.
+Mivel a \texttt{H2} egy relációs adatbázis, a programban pedig objektumokat hozok létre és kezelek, szükség van egy \texttt{Object-Relational Mapper}re, ami az egyedeken végzett műveleteket átalakítja SQL lekérdezéseké, majd ezekkel végzi el a kívánt műveleteket az adatbázisban. A megvalósításban a \texttt{Jakarta Persistence API}t implementáló \texttt{Hibernate} keretrendszert használtam, ami szintén a \texttt{Spring Boot}ba beépülő modulok közé tartozik, és minimális konfigurációt igényel.
+
+A \ref{par:model}. szekcióban szereplő model csomag osztályai meg vannak jelölve az \mintinline{Java}{@Entity} annotációval, az azonosítót tartalmazó adattagjaik az \mintinline{Java}{@Id}, a kapcsolatokat megvalósító adattagjaik pedig a \mintinline{Java}{@OneToOne}, \mintinline{Java}{@ManyToOne}, \mintinline{Java}{@OneToMany} annotációval. Az egyedek közti kapcsolatnál a \mintinline{Java}{@JoinColumn}  annotáció jelöli a kétirányú kapcsolat esetében azt a felet, ahol az idegen kulcs oszlopa szerepel. Ezek az annotációk jelzik a Hibernate számára, mely osztályokból kell kialakítani az egyedeket, illetve mely adattagok és milyen minőségben jelölnek kapcsolatokat.
+
+A program indításakor az adatbázis autmatikusan elindul, és az adatmodellben definiált osztályok és kapcsolatok alapján a Hibernate ORM létrehozza SQL utasítások segítségével a relációs adatbázissémához tartozó megfelelő táblákat. Az alkalmazás futása során a \ref{par:repository}. pontban bemutatott adattárolókon keresztül érhetjük el az adatbázist.
+
+\subsection{Megjelenítési réteg}
+ 
 
 \section{Tesztelés}
