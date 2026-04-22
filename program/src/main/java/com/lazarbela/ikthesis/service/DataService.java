@@ -5,6 +5,7 @@ import com.lazarbela.ikthesis.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -20,8 +21,10 @@ public class DataService {
     final WorkExperienceRepository workExperienceRepository;
     final JobDescriptionRepository jobDescriptionRepository;
 
+    final FileService fileService;
+
     @Autowired
-    public DataService (CertificationRepository cr, EducationRepository er, FileMetadataRepository fmr, OtherFieldRepository ofr, SessionRepository sr, UserDataRepository udr, WorkExperienceRepository wer, JobDescriptionRepository jdr)
+    public DataService (CertificationRepository cr, EducationRepository er, FileMetadataRepository fmr, OtherFieldRepository ofr, SessionRepository sr, UserDataRepository udr, WorkExperienceRepository wer, JobDescriptionRepository jdr, FileService fs)
     {
         certificationRepository = cr;
         educationRepository = er;
@@ -31,6 +34,7 @@ public class DataService {
         userDataRepository = udr;
         workExperienceRepository = wer;
         jobDescriptionRepository = jdr;
+        fileService = fs;
     }
 
     public Certification getCertification (int certificationId)
@@ -335,5 +339,25 @@ public class DataService {
     public Session newSession()
     {
         return  sessionRepository.save(new Session());
+    }
+
+    public Session endSession(String sessionId) throws IOException
+    {
+        Optional<Session> session = sessionRepository.findById(sessionId);
+        if(session.isEmpty())
+            throw new IllegalArgumentException("Session id not found");
+
+        fileService.deleteSessionFiles(session.get().getSessionId());
+//        session.get().getCertifications().forEach(certificationRepository::delete);
+//        session.get().getEducations().forEach(educationRepository::delete);
+//        session.get().getOtherFields().forEach(otherFieldRepository::delete);
+//        session.get().getWorkExperiences().forEach(workExperienceRepository::delete);
+//        if(session.get().getUserData() != null)
+//            userDataRepository.delete(session.get().getUserData());
+//        if(session.get().getJobDescription() != null)
+//            jobDescriptionRepository.delete(session.get().getJobDescription());
+        sessionRepository.delete(session.get());
+
+        return session.get();
     }
 }

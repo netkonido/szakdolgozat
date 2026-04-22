@@ -22,36 +22,36 @@ public class Session {
     private Instant timestamp;
 
     @JsonManagedReference
-    @OneToOne(mappedBy = "session")
+    @OneToOne(mappedBy = "session", cascade = CascadeType.ALL)
     private UserData userData;
 
     @JsonManagedReference
-    @OneToOne(mappedBy = "session")
+    @OneToOne(mappedBy = "session", cascade = CascadeType.ALL)
     private JobDescription jobDescription;
 
     @JsonManagedReference
     @Singular
-    @OneToMany(mappedBy = "session")
-    private Set<Certification> certifications = new HashSet<>();
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL)
+    private Set<Certification> certifications;
 
     @JsonManagedReference
     @Singular
-    @OneToMany(mappedBy = "session")
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL)
     private Set<Education> educations;
 
     @JsonManagedReference
     @Singular
-    @OneToMany(mappedBy = "session")
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL)
     private Set<FileMetadata> files;
 
     @JsonManagedReference
     @Singular
-    @OneToMany(mappedBy = "session")
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL)
     private Set<OtherField> otherFields;
 
     @JsonManagedReference
     @Singular
-    @OneToMany(mappedBy = "session")
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL)
     private Set<WorkExperience> workExperiences;
 
 }

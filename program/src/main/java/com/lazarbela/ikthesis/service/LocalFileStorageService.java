@@ -89,6 +89,8 @@ public class LocalFileStorageService
     public void deleteSessionFolder(String sessionId) throws IOException
     {
         Path normalizedFolderPath = rootPath.resolve(sessionId).normalize();
+        if(!Files.exists(normalizedFolderPath))
+            return;
         Files.walkFileTree(normalizedFolderPath, new SimpleFileVisitor<>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {

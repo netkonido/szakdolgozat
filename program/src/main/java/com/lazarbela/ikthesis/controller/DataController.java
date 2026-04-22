@@ -18,26 +18,6 @@ public class DataController {
 
     private final DataService dataService;
 
-    @GetMapping("/new-session")
-    public ResponseEntity<?> getNewSession()
-    {
-        return(dataService.getNewSession());
-    }
-
-    @GetMapping("/session")
-    public ResponseEntity<?> getSession(@RequestParam("sessionId") String sessionId)
-    {
-        Session session;
-        try{
-            session = dataService.getSessionById(sessionId.get());
-        }
-        catch (IllegalArgumentException e)
-        {
-            return ResponseEntity.badRequest().build();
-        }
-        return ResponseEntity.ok(session);
-    }
-
     @GetMapping("/job-description")
     public JobDescription getJobDescription (@RequestParam("sessionId") String sessionId)
     {
