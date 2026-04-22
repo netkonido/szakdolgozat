@@ -1,5 +1,5 @@
 import type { Route } from "./+types/home";
-import { Link } from "react-router";
+import {Link, useNavigate} from "react-router";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -9,15 +9,15 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-      return (
+    const navigate = useNavigate();
+    return (
           <div className="flex flex-col items-center bg-gray-400">
               <h1 className="text-5xl font-semibold p-10 text-lime-400">Kiberbiztonsági önéletrajz generátor</h1>
-              <ul>
-                  <li><Link to="/data">
-                      <button type="button" className="navbutton">
-                          Kezdés</button>
-                  </Link></li>
-              </ul>
+              <button type="button" className="navbutton" onClick={e =>{
+                  e.preventDefault();
+                  navigate("/data")
+                }}>
+                  Kezdés</button>
           </div>
           );
 }

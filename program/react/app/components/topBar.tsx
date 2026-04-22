@@ -2,12 +2,10 @@ import type {Route} from "../+types/root";
 import {Link, useNavigate} from "react-router";
 
 interface Props {
-    linkPrev: string;
     title: string
 }
 
 export function TopBar({
-                           linkPrev,
                             title,
                        }: Props) {
     const navigate = useNavigate();

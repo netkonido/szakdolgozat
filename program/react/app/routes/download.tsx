@@ -1,5 +1,6 @@
 import type { Route } from "./+types/home";
-import { Link } from "react-router";
+import {Link, useNavigate} from "react-router";
+import {TopBar} from "~/components/topBar";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -9,13 +10,24 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Download() {
+    const navigate = useNavigate();
     return (
-        <div className="flex flex-col items-center">
-            <h1>Download resume</h1>
-            <ul>
-                <li><Link to="/end-session">End Session</Link></li>
-            </ul>
-
+        <div>
+            <TopBar
+                title={"Önéletrajz letöltése"}
+            />
+            <div className="flex flex-col items-center bg-gray-400">
+                <h2 className="text-2xl text-black p-5">Formátum kiválasztása</h2>
+                <select className="border-black border-2 rounded-md w-40 bg-white m-5 p-2">
+                    <option value={"PDF"}>PDF</option>
+                    <option value={"Docx"}>Docx</option>
+                </select>
+                <button type="button" className="navbutton" onClick={e => {
+                    e.preventDefault();
+                    // send request
+                    navigate("/");}}>
+                    Letöltés</button>
+            </div>
         </div>
         );
 }
