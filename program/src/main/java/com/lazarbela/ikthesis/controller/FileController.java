@@ -1,6 +1,7 @@
 package com.lazarbela.ikthesis.controller;
 
 import com.lazarbela.ikthesis.model.FileMetadata;
+import com.lazarbela.ikthesis.service.DataService;
 import com.lazarbela.ikthesis.service.FileService;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -21,9 +22,10 @@ import java.util.Set;
 public class FileController {
 
     private final FileService fileService;
+    private final DataService dataService;
 
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadFile(@RequestParam("sessionId") String sessionId, @RequestParam("file")MultipartFile file)
+    public ResponseEntity<?> uploadFile(@CookieValue("sessionId") String sessionId, @RequestParam("file")MultipartFile file)
     {
         try{
             FileMetadata metadata = fileService.uploadFile(file, sessionId);
@@ -32,20 +34,20 @@ public class FileController {
                             Map.entry("fileId", metadata.getStoredName()),
                             Map.entry("originalName", metadata.getOriginalName())
                     ));
-        } catch (IOException e)
-        {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 
     // redo to only allow resume download
     @GetMapping("/download")
-    public ResponseEntity<Resource> downloadFile(@RequestParam("sessionId") String sessionId)
+    public ResponseEntity<Resource> downloadFile(@CookieValue("sessionId") String sessionId)
     {
-        try
-        {
+        try {
             FileMetadata metadata = fileService.getFileMetadata(sessionId);
             Resource resource = fileService.getFileResource(sessionId);
             return ResponseEntity
@@ -58,14 +60,16 @@ public class FileController {
                     .contentLength(metadata.getSize())
                     .body(resource);
         }
-        catch (IOException e)
-        {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+        catch (IllegalArgumentException e){
+            return ResponseEntity.badRequest().build();
         }
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteFile(@RequestParam("fileName") String fileName, @RequestParam("sessionId") String sessionId)
+    public ResponseEntity<?> deleteFile(@RequestParam("fileName") String fileName, @CookieValue("sessionId") String sessionId)
     {
         try
         {
@@ -82,7 +86,7 @@ public class FileController {
         }
     }
     @DeleteMapping("/delete-all-files")
-    public ResponseEntity<?> deleteSessionFiles(@RequestParam("sessionId") String sessionId)
+    public ResponseEntity<?> deleteSessionFiles(@CookieValue("sessionId") String sessionId)
     {
         try
         {
@@ -91,7 +95,33 @@ public class FileController {
         }
         catch (IOException e)
         {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.internalServerError().build();
+        }
+        catch (IllegalArgumentException e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/uploaded-files")
+    public ResponseEntity<?> getUploadedFiles (@CookieValue("sessionId") String sessionId)
+    {
+        try{
+            Set<FileMetadata> files = dataService.getFiles(sessionId);
+            return ResponseEntity.ok(files
+                    .stream().map(
+                            (item) ->
+                                    Map.ofEntries(
+                                            Map.entry("originalName", item.getOriginalName()),
+                                            Map.entry("id", item.getStoredName())
+                                    )
+                    )
+            );
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+        catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 }

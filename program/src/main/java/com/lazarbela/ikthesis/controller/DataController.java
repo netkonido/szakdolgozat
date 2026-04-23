@@ -3,11 +3,9 @@ package com.lazarbela.ikthesis.controller;
 import com.lazarbela.ikthesis.model.*;
 import com.lazarbela.ikthesis.service.DataService;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -19,14 +17,23 @@ public class DataController {
     private final DataService dataService;
 
     @GetMapping("/job-description")
-    public JobDescription getJobDescription (@RequestParam("sessionId") String sessionId)
+    public ResponseEntity<JobDescription> getJobDescription (@CookieValue("sessionId") String sessionId)
     {
-        return dataService.getJobDescription(sessionId);
+        try {
+            return ResponseEntity.ok(dataService.getJobDescription(sessionId));
+        }
+        catch (IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().build();
+        }
+        catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PostMapping("/job-description")
     public ResponseEntity<JobDescription> postJobDescription (
-            @RequestParam("sessionId") String sessionId,
+            @CookieValue("sessionId") String sessionId,
             @RequestParam("content") String content)
     {
         Session session;
@@ -36,6 +43,9 @@ public class DataController {
         catch (IllegalArgumentException e)
         {
             return ResponseEntity.badRequest().build();
+        }
+        catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
         }
 
         JobDescription jobDescription = new JobDescription();
@@ -48,7 +58,7 @@ public class DataController {
 
     @PatchMapping("/job-description")
     public ResponseEntity<JobDescription> updateJobDescription(
-            @RequestParam String sessionId,
+            @CookieValue String sessionId,
             @RequestParam String content
     ) {
         try {
@@ -57,299 +67,354 @@ public class DataController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
+        catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @GetMapping("/user-data")
-    public UserData getUserData (@RequestParam("sessionId") String sessionId)
+    public ResponseEntity<UserData> getUserData (@CookieValue("sessionId") String sessionId)
     {
-        return dataService.getUserData(sessionId);
+        try{
+            return ResponseEntity.ok(dataService.getUserData(sessionId));
+        }
+        catch (IllegalArgumentException e){
+            return ResponseEntity.badRequest().build();
+        }
+        catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PostMapping("/user-data")
     public ResponseEntity<UserData> postUserData (
-            @RequestParam("sessionId") String sessionId,
-            @RequestParam("name") String name,
-            @RequestParam("email") String email,
+            @CookieValue("sessionId") String sessionId,
+            @RequestParam("name") Optional<String> name,
+            @RequestParam("email") Optional<String> email,
             @RequestParam("telephone") Optional<String> telephone)
     {
-        try
-        {
+        try {
             Session session = dataService.getSessionById(sessionId);
-            UserData newUserData;
-            if(telephone.isPresent())
-            {
-                newUserData = dataService.saveUserData(new UserData(session, name, email, telephone.get()));
-            }
-            else
-            {
-                newUserData = dataService.saveUserData(new UserData(session, name, email));
-            }
+            UserData newUserData = new UserData(session);
+
+            name.ifPresent(newUserData::setName);
+            email.ifPresent(newUserData::setEmailAddress);
+            telephone.ifPresent(newUserData::setTelephoneNumber);
+
+            dataService.saveUserData(newUserData);
             return ResponseEntity.ok(newUserData);
         }
-        catch(IllegalArgumentException e)
-        {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        catch(IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+        catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 
     @PatchMapping("/user-data")
     public ResponseEntity<UserData> patchUserData (
-            @RequestParam("sessionId") String sessionId,
+            @CookieValue("sessionId") String sessionId,
             @RequestParam("name") Optional<String> name,
             @RequestParam("email") Optional<String> email,
             @RequestParam("telephone") Optional<String> telephone)
     {
-        try
-        {
+        try {
             UserData newUserData = dataService.updateUserData(sessionId, name, email, telephone);
             return ResponseEntity.ok(newUserData);
         }
-        catch(Exception e)
-        {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 
     @GetMapping("/certifications")
-    public Set<Certification> getCertifications (@RequestParam("sessionId") String sessionId)
+    public ResponseEntity<Set<Certification>> getCertifications (@CookieValue("sessionId") String sessionId)
     {
-        return dataService.getCertifications(sessionId);
+        try{
+            return ResponseEntity.ok(dataService.getCertifications(sessionId));
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+        catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PostMapping("/certifications")
     public ResponseEntity<Certification> postCertification (
-            @RequestParam("sessionId") String sessionId,
+            @CookieValue("sessionId") String sessionId,
             @RequestParam("content") String content)
     {
-        Session session;
         try{
-            session = dataService.getSessionById(sessionId);
+            Session session = dataService.getSessionById(sessionId);
+
+            Certification certification = new Certification();
+            certification.setContent(content);
+            certification.setSession(session);
+
+            dataService.saveCertification(certification);
+            return ResponseEntity.ok(certification);
         }
-        catch (IllegalArgumentException e)
-        {
+        catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
-
-        Certification certification = new Certification();
-        certification.setContent(content);
-        certification.setSession(session);
-
-        dataService.saveCertification(certification);
-        return ResponseEntity.ok(certification);
+        catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PatchMapping("/certifications")
     public ResponseEntity<Certification> updateCertification(
-            @RequestParam String sessionId,
-            @RequestParam int certificationId,
-            @RequestParam String content
+            @CookieValue("sessionId") String sessionId,
+            @RequestParam("certificationId") int certificationId,
+            @RequestParam("content") String content
     ) {
         try {
             Certification updated = dataService.updateCertification(sessionId, certificationId, content);
             return ResponseEntity.ok(updated);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
         }
+        catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().build();
+            }
+        catch(Exception e) {
+                return ResponseEntity.internalServerError().build();
+            }
     }
 
     @DeleteMapping("/certifications")
     public ResponseEntity<Void> deleteCertification(
-            @RequestParam String sessionId,
-            @RequestParam int certificationId
+            @CookieValue("sessionId") String sessionId,
+            @RequestParam("certificationId") int certificationId
     ) {
         try {
             dataService.deleteCertification(sessionId, certificationId);
             return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
         }
+        catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().build();
+            }
+        catch(Exception e) {
+                return ResponseEntity.internalServerError().build();
+            }
     }
 
     @GetMapping("/educations")
-    public Set<Education> getEducations (@RequestParam("sessionId") String sessionId)
+    public ResponseEntity<Set<Education>> getEducations (@CookieValue("sessionId") String sessionId)
     {
-        return dataService.getEducations(sessionId);
+        try {
+            return ResponseEntity.ok(dataService.getEducations(sessionId));
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+        catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PostMapping("/educations")
     public ResponseEntity<Education> postEducation (
-            @RequestParam("sessionId") String sessionId,
+            @CookieValue("sessionId") String sessionId,
             @RequestParam("content") String content)
     {
-        Session session;
         try{
-            session = dataService.getSessionById(sessionId);
+            Session session = dataService.getSessionById(sessionId);
+
+            Education education = new Education();
+            education.setContent(content);
+            education.setSession(session);
+
+            dataService.saveEducation(education);
+            return ResponseEntity.ok(education);
         }
-        catch (IllegalArgumentException e)
-        {
+        catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
+        catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
 
-        Education education = new Education();
-        education.setContent(content);
-        education.setSession(session);
 
-        dataService.saveEducation(education);
-        return ResponseEntity.ok(education);
     }
 
     @PatchMapping("/educations")
     public ResponseEntity<Education> updateEducation(
-            @RequestParam String sessionId,
-            @RequestParam int educationId,
-            @RequestParam String content
+            @CookieValue("sessionId") String sessionId,
+            @RequestParam("educationId") int educationId,
+            @RequestParam("content") String content
     ) {
         try {
             Education updated = dataService.updateEducation(sessionId, educationId, content);
             return ResponseEntity.ok(updated);
-        } catch (Exception e) {
+        }
+        catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
+        }
+        catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 
     @DeleteMapping("/educations")
     public ResponseEntity<Void> deleteEducation(
-            @RequestParam String sessionId,
-            @RequestParam int educationId
+            @CookieValue("sessionId") String sessionId,
+            @RequestParam("educationId") int educationId
     ) {
         try {
             dataService.deleteEducation(sessionId, educationId);
             return ResponseEntity.noContent().build();
-        } catch (Exception e) {
+        }
+        catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
+        }
+        catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 
     @GetMapping("/other-fields")
-    public Set<OtherField> getOtherFields (@RequestParam("sessionId") String sessionId)
+    public ResponseEntity<Set<OtherField>> getOtherFields (@CookieValue("sessionId") String sessionId)
     {
-        return dataService.getOtherFields(sessionId);
+        try{
+            return ResponseEntity.ok(dataService.getOtherFields(sessionId));
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+        catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PostMapping("/other-fields")
     public ResponseEntity<OtherField> postOtherField (
-            @RequestParam("sessionId") String sessionId,
+            @CookieValue("sessionId") String sessionId,
             @RequestParam("content") String content)
     {
-        Session session;
         try{
-            session = dataService.getSessionById(sessionId);
+            Session session = dataService.getSessionById(sessionId);
+
+            OtherField otherField = new OtherField();
+            otherField.setContent(content);
+            otherField.setSession(session);
+
+            dataService.saveOtherField(otherField);
+            return ResponseEntity.ok(otherField);
         }
-        catch (IllegalArgumentException e)
-        {
+        catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
-
-        OtherField otherField = new OtherField();
-        otherField.setContent(content);
-        otherField.setSession(session);
-
-        dataService.saveOtherField(otherField);
-        return ResponseEntity.ok(otherField);
+        catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PatchMapping("/other-fields")
     public ResponseEntity<OtherField> updateOtherField(
-            @RequestParam String sessionId,
-            @RequestParam int otherFieldId,
-            @RequestParam String content
+            @CookieValue("sessionId") String sessionId,
+            @RequestParam("otherFieldId") int otherFieldId,
+            @RequestParam("content") String content
     ) {
         try {
             OtherField updated = dataService.updateOtherField(sessionId, otherFieldId, content);
             return ResponseEntity.ok(updated);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
         }
+        catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().build();
+            }
+        catch(Exception e) {
+                return ResponseEntity.internalServerError().build();
+            }
     }
 
     @DeleteMapping("/other-fields")
     public ResponseEntity<Void> deleteOtherField(
-            @RequestParam String sessionId,
-            @RequestParam int otherFieldId
+            @CookieValue("sessionId") String sessionId,
+            @RequestParam("otherFieldId") int otherFieldId
     ) {
         try {
             dataService.deleteOtherField(sessionId, otherFieldId);
             return ResponseEntity.noContent().build();
-        } catch (Exception e) {
+        }
+        catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
+        }
+        catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 
     @GetMapping("/work-experiences")
-    public Set<WorkExperience> getWorkExperiences (@RequestParam("sessionId") String sessionId)
+    public ResponseEntity<Set<WorkExperience>> getWorkExperiences (@CookieValue("sessionId") String sessionId)
     {
-        return dataService.getWorkExperiences(sessionId);
+        try{
+            return ResponseEntity.ok(dataService.getWorkExperiences(sessionId));
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+        catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PostMapping("/work-experiences")
     public ResponseEntity<WorkExperience> postWorkExperience (
-            @RequestParam("sessionId") String sessionId,
+            @CookieValue("sessionId") String sessionId,
             @RequestParam("content") String content)
     {
-        Session session;
         try{
-            session = dataService.getSessionById(sessionId);
+            Session session = dataService.getSessionById(sessionId);
+
+            WorkExperience workExperience = new WorkExperience();
+            workExperience.setContent(content);
+            workExperience.setSession(session);
+
+            dataService.saveWorkExperience(workExperience);
+            return ResponseEntity.ok(workExperience);
         }
-        catch (IllegalArgumentException e)
-        {
+        catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
-
-        WorkExperience workExperience = new WorkExperience();
-        workExperience.setContent(content);
-        workExperience.setSession(session);
-
-        dataService.saveWorkExperience(workExperience);
-        return ResponseEntity.ok(workExperience);
+        catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PatchMapping("/work-experiences")
     public ResponseEntity<WorkExperience> updateWorkExperience(
-            @RequestParam String sessionId,
-            @RequestParam int workExperienceId,
-            @RequestParam String content
+            @CookieValue("sessionId") String sessionId,
+            @RequestParam("workExperienceId") int workExperienceId,
+            @RequestParam("content") String content
     ) {
         try {
             WorkExperience updated = dataService.updateWorkExperience(sessionId, workExperienceId, content);
             return ResponseEntity.ok(updated);
-        } catch (Exception e) {
+        }
+        catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
+        catch(Exception e) {
+                return ResponseEntity.internalServerError().build();
+            }
     }
 
     @DeleteMapping("/work-experiences")
     public ResponseEntity<Void> deleteWorkExperience(
-            @RequestParam String sessionId,
-            @RequestParam int workExperienceId
+            @CookieValue("sessionId") String sessionId,
+            @RequestParam("workExperienceId") int workExperienceId
     ) {
         try {
             dataService.deleteWorkExperience(sessionId, workExperienceId);
             return ResponseEntity.noContent().build();
-        } catch (Exception e) {
+        }
+        catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
-    }
-
-    @GetMapping("/uploaded-files")
-    public ResponseEntity<?> getUploadedFiles (@RequestParam("sessionId") String sessionId)
-    {
-        Set<FileMetadata> files;
-        try{
-            files = dataService.getFiles(sessionId);
+        catch(Exception e) {
+            return ResponseEntity.internalServerError().build();
         }
-        catch (IllegalArgumentException e)
-        {
-            return ResponseEntity.badRequest().build();
-        }
-
-        return ResponseEntity.ok(files
-                .stream().map(
-                        (item) ->
-                                Map.ofEntries(
-                                        Map.entry("originalName", item.getOriginalName()),
-                                        Map.entry("size", item.getSize())
-                                )
-                )
-        );
     }
 }

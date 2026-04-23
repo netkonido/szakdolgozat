@@ -23,18 +23,8 @@ public class UserData {
     @JoinColumn(name = "session_id", nullable = false)
     private Session session;
 
-    public UserData (Session session, String name, String emailAddress, String telephoneNumber)
+    public UserData (Session session)
     {
         this.session = session;
-        this.name = name;
-        this.emailAddress = emailAddress;
-        this.telephoneNumber = telephoneNumber;
-    }
-
-    public UserData (Session session, String name, String emailAddress)
-    {
-        this.session = session;
-        this.name = name;
-        this.emailAddress = emailAddress;
     }
 }

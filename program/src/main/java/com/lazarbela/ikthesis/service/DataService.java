@@ -52,10 +52,7 @@ public class DataService {
         return session.get().getCertifications();
     }
 
-    public Certification saveCertification (Certification certification)
-    {
-        return certificationRepository.save(certification);
-    }
+    public Certification saveCertification (Certification certification) { return certificationRepository.save(certification); }
 
     public Certification updateCertification (String sessionId, int certificationId, String newContent)
     {
@@ -65,7 +62,7 @@ public class DataService {
             throw new IllegalArgumentException("Certification id not found");
 
         if(!certificationToModify.get().getSession().getSessionId().equals(sessionId))
-            throw new SecurityException();
+            throw new SecurityException("Session id does not match");
 
         certificationToModify.get().setContent(newContent);
 
@@ -79,7 +76,7 @@ public class DataService {
             throw new IllegalArgumentException("Certification id not found");
 
         if(!certificationToDelete.get().getSession().getSessionId().equals(sessionId))
-            throw new SecurityException();
+            throw new SecurityException("Session id does not match");
 
         certificationRepository.delete(certificationToDelete.get());
         return  certificationToDelete.get();
@@ -102,10 +99,7 @@ public class DataService {
         return session.get().getEducations();
     }
 
-    public Education saveEducation (Education education)
-    {
-        return educationRepository.save(education);
-    }
+    public Education saveEducation (Education education) { return educationRepository.save(education); }
 
     public Education updateEducation (String sessionId, int educationId, String newContent)
     {
@@ -114,7 +108,7 @@ public class DataService {
             throw new IllegalArgumentException("Education id not found");
 
         if(!educationToModify.get().getSession().getSessionId().equals(sessionId))
-            throw new SecurityException();
+            throw new SecurityException("Session id does not match");
 
         educationToModify.get().setContent(newContent);
 
@@ -128,7 +122,7 @@ public class DataService {
             throw new IllegalArgumentException("Education id not found");
 
         if(!educationToDelete.get().getSession().getSessionId().equals(sessionId))
-            throw new SecurityException();
+            throw new SecurityException("Session id does not match");
 
         educationRepository.delete(educationToDelete.get());
         return  educationToDelete.get();
@@ -151,10 +145,7 @@ public class DataService {
         return session.get().getOtherFields();
     }
 
-    public OtherField saveOtherField (OtherField otherField)
-    {
-        return otherFieldRepository.save(otherField);
-    }
+    public OtherField saveOtherField (OtherField otherField) { return otherFieldRepository.save(otherField); }
 
     public OtherField updateOtherField (String sessionId, int otherFieldId, String newContent)
     {
@@ -163,7 +154,7 @@ public class DataService {
             throw new IllegalArgumentException("Other Field id not found");
 
         if(!otherFieldToModify.get().getSession().getSessionId().equals(sessionId))
-            throw new SecurityException();
+            throw new SecurityException("Session id does not match");
 
         otherFieldToModify.get().setContent(newContent);
 
@@ -177,7 +168,7 @@ public class DataService {
             throw new IllegalArgumentException("Other Field id not found");
 
         if(!otherFieldToDelete.get().getSession().getSessionId().equals(sessionId))
-            throw new SecurityException();
+            throw new SecurityException("Session id does not match");
 
         otherFieldRepository.delete(otherFieldToDelete.get());
         return  otherFieldToDelete.get();
@@ -199,10 +190,7 @@ public class DataService {
         return session.get().getWorkExperiences();
     }
 
-    public WorkExperience saveWorkExperience (WorkExperience workExperience)
-    {
-        return workExperienceRepository.save(workExperience);
-    }
+    public WorkExperience saveWorkExperience (WorkExperience workExperience) { return workExperienceRepository.save(workExperience); }
 
     public WorkExperience updateWorkExperience (String sessionId, int workExperienceId, String newContent)
     {
@@ -211,7 +199,7 @@ public class DataService {
             throw new IllegalArgumentException("Work experience id not found");
 
         if(!workExperienceToModify.get().getSession().getSessionId().equals(sessionId))
-            throw new SecurityException();
+            throw new SecurityException("Session id does not match");
 
         workExperienceToModify.get().setContent(newContent);
 
@@ -225,7 +213,7 @@ public class DataService {
             throw new IllegalArgumentException("Work experience id not found");
 
         if(!workExperienceToDelete.get().getSession().getSessionId().equals(sessionId))
-            throw new SecurityException();
+            throw new SecurityException("Session id does not match");
 
         workExperienceRepository.delete(workExperienceToDelete.get());
         return  workExperienceToDelete.get();
@@ -240,10 +228,7 @@ public class DataService {
         return session.get().getJobDescription();
     }
 
-    public JobDescription saveJobDescription (JobDescription jobDescription)
-    {
-        return jobDescriptionRepository.save(jobDescription);
-    }
+    public JobDescription saveJobDescription (JobDescription jobDescription) { return jobDescriptionRepository.save(jobDescription); }
 
     public JobDescription updateJobDescription (String sessionId, String newContent)
     {
@@ -260,21 +245,6 @@ public class DataService {
         return jobDescriptionRepository.save(jobDescriptionToModify);
     }
 
-    public JobDescription deleteJobDescription (String sessionId)
-    {
-        Optional<Session> session = sessionRepository.findById(sessionId);
-        if(session.isEmpty())
-            throw new IllegalArgumentException("Session id not found");
-
-        JobDescription jobDescriptionToDelete = session.get().getJobDescription();
-        if(jobDescriptionToDelete == null)
-            throw new IllegalArgumentException("Job Description not set");
-
-        jobDescriptionRepository.delete(jobDescriptionToDelete);
-
-        return jobDescriptionToDelete;
-    }
-
     public UserData getUserData (String sessionId)
     {
         Optional<Session> session = sessionRepository.findById(sessionId);
@@ -284,10 +254,7 @@ public class DataService {
         return session.get().getUserData();
     }
 
-    public UserData saveUserData (UserData userData)
-    {
-        return userDataRepository.save(userData);
-    }
+    public UserData saveUserData (UserData userData) { return userDataRepository.save(userData); }
 
     public UserData updateUserData (String sessionId, Optional<String> name, Optional<String> email, Optional<String> telephone)
     {
@@ -306,21 +273,6 @@ public class DataService {
         return userDataRepository.save(userDataToModify);
     }
 
-    public UserData deleteUserData (String sessionId)
-    {
-        Optional<Session> session = sessionRepository.findById(sessionId);
-        if(session.isEmpty())
-            throw new IllegalArgumentException("Session id not found");
-
-        UserData userDataToDelete = session.get().getUserData();
-
-        if(userDataToDelete == null)
-            throw new IllegalArgumentException("User data not set");
-
-        userDataRepository.delete(userDataToDelete);
-        return userDataToDelete;
-    }
-
     public Set<FileMetadata> getFiles (String sessionId)
     {
         Optional<Session> session = sessionRepository.findById(sessionId);
@@ -336,10 +288,8 @@ public class DataService {
             throw new IllegalArgumentException("Session id not found");
         return session.get();
     }
-    public Session newSession()
-    {
-        return  sessionRepository.save(new Session());
-    }
+
+    public Session newSession() { return sessionRepository.save(new Session()); }
 
     public Session endSession(String sessionId) throws IOException
     {
@@ -348,14 +298,6 @@ public class DataService {
             throw new IllegalArgumentException("Session id not found");
 
         fileService.deleteSessionFiles(session.get().getSessionId());
-//        session.get().getCertifications().forEach(certificationRepository::delete);
-//        session.get().getEducations().forEach(educationRepository::delete);
-//        session.get().getOtherFields().forEach(otherFieldRepository::delete);
-//        session.get().getWorkExperiences().forEach(workExperienceRepository::delete);
-//        if(session.get().getUserData() != null)
-//            userDataRepository.delete(session.get().getUserData());
-//        if(session.get().getJobDescription() != null)
-//            jobDescriptionRepository.delete(session.get().getJobDescription());
         sessionRepository.delete(session.get());
 
         return session.get();

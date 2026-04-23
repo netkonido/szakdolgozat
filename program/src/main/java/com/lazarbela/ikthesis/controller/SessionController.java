@@ -3,11 +3,8 @@ package com.lazarbela.ikthesis.controller;
 import com.lazarbela.ikthesis.model.Session;
 import com.lazarbela.ikthesis.service.DataService;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/session")
@@ -23,7 +20,7 @@ public class SessionController {
     }
 
     @GetMapping("/get")
-    public ResponseEntity<?> getSession(@RequestParam("sessionId") String sessionId)
+    public ResponseEntity<?> getSession(@CookieValue("sessionId") String sessionId)
     {
         Session session;
         try{
@@ -37,18 +34,18 @@ public class SessionController {
     }
 
     @DeleteMapping("/end")
-    public ResponseEntity<?> deleteSession(@RequestParam("sessionId") String sessionId)
+    public ResponseEntity<?> deleteSession(@CookieValue("sessionId") String sessionId)
     {
         Session session;
         try {
             session = dataService.endSession(sessionId);
         }
         catch(IllegalArgumentException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.badRequest().build();
         }
-        catch(IOException e)
+        catch(Exception e)
         {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.internalServerError().build();
         }
 
         return ResponseEntity.ok(session);
