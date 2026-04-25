@@ -2,6 +2,7 @@ package com.lazarbela.ikthesis.controller;
 
 import com.lazarbela.ikthesis.model.*;
 import com.lazarbela.ikthesis.service.DataService;
+import com.lazarbela.ikthesis.service.SessionService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,12 +10,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 import java.util.Set;
 
+@CrossOrigin(origins="http://localhost:5173/", allowCredentials = "true")
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/data")
 public class DataController {
 
     private final DataService dataService;
+    private final SessionService sessionService;
 
     @GetMapping("/job-description")
     public ResponseEntity<JobDescription> getJobDescription (@CookieValue("sessionId") String sessionId)
@@ -38,7 +41,7 @@ public class DataController {
     {
         Session session;
         try{
-            session = dataService.getSessionById(sessionId);
+            session = sessionService.getSessionById(sessionId);
         }
         catch (IllegalArgumentException e)
         {
@@ -94,7 +97,7 @@ public class DataController {
             @RequestParam("telephone") Optional<String> telephone)
     {
         try {
-            Session session = dataService.getSessionById(sessionId);
+            Session session = sessionService.getSessionById(sessionId);
             UserData newUserData = new UserData(session);
 
             name.ifPresent(newUserData::setName);
@@ -148,7 +151,7 @@ public class DataController {
             @RequestParam("content") String content)
     {
         try{
-            Session session = dataService.getSessionById(sessionId);
+            Session session = sessionService.getSessionById(sessionId);
 
             Certification certification = new Certification();
             certification.setContent(content);
@@ -168,7 +171,7 @@ public class DataController {
     @PatchMapping("/certifications")
     public ResponseEntity<Certification> updateCertification(
             @CookieValue("sessionId") String sessionId,
-            @RequestParam("certificationId") int certificationId,
+            @RequestParam("id") int certificationId,
             @RequestParam("content") String content
     ) {
         try {
@@ -186,7 +189,7 @@ public class DataController {
     @DeleteMapping("/certifications")
     public ResponseEntity<Void> deleteCertification(
             @CookieValue("sessionId") String sessionId,
-            @RequestParam("certificationId") int certificationId
+            @RequestParam("id") int certificationId
     ) {
         try {
             dataService.deleteCertification(sessionId, certificationId);
@@ -220,7 +223,7 @@ public class DataController {
             @RequestParam("content") String content)
     {
         try{
-            Session session = dataService.getSessionById(sessionId);
+            Session session = sessionService.getSessionById(sessionId);
 
             Education education = new Education();
             education.setContent(content);
@@ -242,7 +245,7 @@ public class DataController {
     @PatchMapping("/educations")
     public ResponseEntity<Education> updateEducation(
             @CookieValue("sessionId") String sessionId,
-            @RequestParam("educationId") int educationId,
+            @RequestParam("id") int educationId,
             @RequestParam("content") String content
     ) {
         try {
@@ -260,7 +263,7 @@ public class DataController {
     @DeleteMapping("/educations")
     public ResponseEntity<Void> deleteEducation(
             @CookieValue("sessionId") String sessionId,
-            @RequestParam("educationId") int educationId
+            @RequestParam("id") int educationId
     ) {
         try {
             dataService.deleteEducation(sessionId, educationId);
@@ -294,7 +297,7 @@ public class DataController {
             @RequestParam("content") String content)
     {
         try{
-            Session session = dataService.getSessionById(sessionId);
+            Session session = sessionService.getSessionById(sessionId);
 
             OtherField otherField = new OtherField();
             otherField.setContent(content);
@@ -314,7 +317,7 @@ public class DataController {
     @PatchMapping("/other-fields")
     public ResponseEntity<OtherField> updateOtherField(
             @CookieValue("sessionId") String sessionId,
-            @RequestParam("otherFieldId") int otherFieldId,
+            @RequestParam("id") int otherFieldId,
             @RequestParam("content") String content
     ) {
         try {
@@ -332,7 +335,7 @@ public class DataController {
     @DeleteMapping("/other-fields")
     public ResponseEntity<Void> deleteOtherField(
             @CookieValue("sessionId") String sessionId,
-            @RequestParam("otherFieldId") int otherFieldId
+            @RequestParam("id") int otherFieldId
     ) {
         try {
             dataService.deleteOtherField(sessionId, otherFieldId);
@@ -366,7 +369,7 @@ public class DataController {
             @RequestParam("content") String content)
     {
         try{
-            Session session = dataService.getSessionById(sessionId);
+            Session session = sessionService.getSessionById(sessionId);
 
             WorkExperience workExperience = new WorkExperience();
             workExperience.setContent(content);
@@ -386,7 +389,7 @@ public class DataController {
     @PatchMapping("/work-experiences")
     public ResponseEntity<WorkExperience> updateWorkExperience(
             @CookieValue("sessionId") String sessionId,
-            @RequestParam("workExperienceId") int workExperienceId,
+            @RequestParam("id") int workExperienceId,
             @RequestParam("content") String content
     ) {
         try {
@@ -404,7 +407,7 @@ public class DataController {
     @DeleteMapping("/work-experiences")
     public ResponseEntity<Void> deleteWorkExperience(
             @CookieValue("sessionId") String sessionId,
-            @RequestParam("workExperienceId") int workExperienceId
+            @RequestParam("id") int workExperienceId
     ) {
         try {
             dataService.deleteWorkExperience(sessionId, workExperienceId);

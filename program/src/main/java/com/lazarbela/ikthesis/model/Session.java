@@ -10,11 +10,16 @@ import java.util.Set;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
 public class Session {
+
+    public Session()
+    {
+        timestamp = Instant.now();
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String sessionId;

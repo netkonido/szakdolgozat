@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
 
@@ -281,25 +282,6 @@ public class DataService {
         return session.get().getFiles();
     }
 
-    public Session getSessionById (String sessionId)
-    {
-        Optional<Session> session = sessionRepository.findById(sessionId);
-        if(session.isEmpty())
-            throw new IllegalArgumentException("Session id not found");
-        return session.get();
-    }
 
-    public Session newSession() { return sessionRepository.save(new Session()); }
 
-    public Session endSession(String sessionId) throws IOException
-    {
-        Optional<Session> session = sessionRepository.findById(sessionId);
-        if(session.isEmpty())
-            throw new IllegalArgumentException("Session id not found");
-
-        fileService.deleteSessionFiles(session.get().getSessionId());
-        sessionRepository.delete(session.get());
-
-        return session.get();
-    }
 }

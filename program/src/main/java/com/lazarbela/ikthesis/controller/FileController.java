@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
+@CrossOrigin(origins="http://localhost:5173/", allowCredentials = "true")
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/v1/files")
@@ -112,7 +113,7 @@ public class FileController {
                             (item) ->
                                     Map.ofEntries(
                                             Map.entry("originalName", item.getOriginalName()),
-                                            Map.entry("id", item.getStoredName())
+                                            Map.entry("fileId", item.getStoredName())
                                     )
                     )
             );

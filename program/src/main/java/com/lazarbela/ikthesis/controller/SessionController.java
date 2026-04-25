@@ -2,29 +2,40 @@ package com.lazarbela.ikthesis.controller;
 
 import com.lazarbela.ikthesis.model.Session;
 import com.lazarbela.ikthesis.service.DataService;
+import com.lazarbela.ikthesis.service.SessionService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+
+@CrossOrigin(origins="http://localhost:5173/", allowCredentials = "true")
 @RestController
 @RequestMapping("/api/v1/session")
 @AllArgsConstructor
 public class SessionController {
 
-    private final DataService dataService;
+    private final SessionService sessionService;
 
     @GetMapping("/new")
-    public ResponseEntity<String> getNewSession()
+    public ResponseEntity<?> getNewSession(HttpServletResponse response)
     {
-        return ResponseEntity.ok(dataService.newSession().getSessionId());
+        String sessionId = sessionService.newSession().getSessionId();
+        HttpCookie cookie = ResponseCookie.from("sessionId", sessionId)
+                .httpOnly(true)
+                .path("/")
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).header(HttpHeaders.SET_COOKIE, cookie.toString()).body(sessionId);
     }
 
     @GetMapping("/get")
-    public ResponseEntity<?> getSession(@CookieValue("sessionId") String sessionId)
+    public ResponseEntity<?> getExistingSession(@CookieValue("sessionId") String sessionId)
     {
         Session session;
         try{
-            session = dataService.getSessionById(sessionId);
+            session = sessionService.getSessionById(sessionId);
         }
         catch (IllegalArgumentException e)
         {
@@ -38,7 +49,7 @@ public class SessionController {
     {
         Session session;
         try {
-            session = dataService.endSession(sessionId);
+            session = sessionService.endSession(sessionId);
         }
         catch(IllegalArgumentException e){
             return ResponseEntity.badRequest().build();
@@ -48,6 +59,6 @@ public class SessionController {
             return ResponseEntity.internalServerError().build();
         }
 
-        return ResponseEntity.ok(session);
+        return ResponseEntity.status(HttpStatus.OK).header(HttpHeaders.SET_COOKIE, "").body(session);
     }
 }
