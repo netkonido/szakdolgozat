@@ -1,51 +1,89 @@
-import {Link, useNavigate} from "react-router";
+import {Form, redirect, useLoaderData, useNavigate} from "react-router";
 import {TopBar} from "~/components/topBar";
 import type {Route} from "../../.react-router/types/app/+types/root";
-import Educations from "~/data/educations";
-import Certifications from "~/data/certifications";
-import WorkExperiences from "~/data/work_experiences";
-import OtherFields from "~/data/other_fields";
+import DataItemList from "~/components/data_item_list";
+import axios from "axios";
+
+type Item = { id: number; content: string };
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Data Entry" },
-    { name: "description", content: "This page can be used to enter personal data." },
+    { title: "Adatbevitel" },
+    { name: "description", content: "Ezen az oldalon felviheti a felhasználó a ." },
   ];
 }
 
-export default function Data() {
+export async function clientLoader(args:Route.ClientLoaderArgs)
+{
+    await axios.get("http://localhost:8080/api/v1/session/get",{withCredentials:true}).catch(err =>{
+        console.log("No valid session in progress, rerouting");
+        throw redirect("/");
+    });
+
+    const result = await axios.get('http://localhost:8080/api/v1/data/user-data', {withCredentials: true}).then(res => res.data).catch(err => err);
+    if (result.toString() === "")
+    {
+        console.log("posted user data")
+        await axios.post('http://localhost:8080/api/v1/data/user-data',{name:"", email:"", telephone:"",}, {withCredentials: true, headers:{"Content-Type": "multipart/form-data"}}).then(res => res.data).catch(err => err);
+    }
+
+    let certificationsPromise = axios.get<Item[]>(`http://localhost:8080/api/v1/data/certifications`,{withCredentials: true}).then(res => res.data).catch(res => console.log(res));
+    let educationsPromise = axios.get<Item[]>(`http://localhost:8080/api/v1/data/educations`,{withCredentials: true}).then(res => res.data).catch(res => console.log(res));
+    let workExperiencesPromise = axios.get<Item[]>(`http://localhost:8080/api/v1/data/work-experiences`,{withCredentials: true}).then(res => res.data).catch(res => console.log(res));
+    let otherFieldsPromise = axios.get<Item[]>(`http://localhost:8080/api/v1/data/other-fields`,{withCredentials: true}).then(res => res.data).catch(res => console.log(res));
+
+    return { certificationsPromise, educationsPromise, workExperiencesPromise, otherFieldsPromise};
+}
+clientLoader.hydrate = true as const;
+
+export default function Data({loaderData,}:Route.ComponentProps) {
     const navigate = useNavigate();
+    let { certificationsPromise, educationsPromise, workExperiencesPromise, otherFieldsPromise } = useLoaderData();
     return (
         <div>
             <TopBar
                 title={"Adatok Bevitele"}
             />
-            <div className="flex flex-col items-center bg-gray-400 p-5">
+            <div className="flex flex-col items-center bg-lime-200 p-5">
                 <button type="button" className="navbutton" onClick={e => {e.preventDefault()
                 navigate("/data/import")}}>
                     Adatok importálása</button>
 
                 <div className="flex w-full">
-                    <div className="flex-1/3 items-center p-5 m-5 border-2 border-gray-200">
-                        <h2 className="text-black text-3xl font-semibold p-3">Alapadatok bevitele</h2>
-                        <div className="m-3">
-                            <h3 className="text-xl text-black p-2">Név</h3>
-                            <input type="text" className="bg-white hover:bg-gray-200 h-10 w-full border-2 border-black rounded-md p-2"/>
+                    <Form
+                        onBlur={e => {
+                            e.preventDefault();
+                            const nameInput = e.currentTarget.elements.namedItem("name") as HTMLFormElement;
+                            const emailInput = e.currentTarget.elements.namedItem("email") as HTMLFormElement;
+                            const telInput = e.currentTarget.elements.namedItem("tel") as HTMLFormElement;
+                            const formData = {
+                                name: nameInput.value,
+                                email:emailInput.value,
+                                telephone:telInput.value,
+                            }
+                            axios.patch('http://localhost:8080/api/v1/data/user-data', formData ,{withCredentials: true, headers:{"Content-Type":"multipart/form-data"}}).then(res => null).catch(err => null);
+                        }}>
+                        <div className="flex-1/3 items-center p-5 m-5">
+                            <h2 className="text-black text-3xl font-semibold p-3">Alapadatok bevitele</h2>
+                            <div className="m-3">
+                                <h3 className="text-xl text-black p-2">Név</h3>
+                                <input id="name" type="text" placeholder="Minta János" className="bg-white hover:bg-gray-200 h-10 w-full border-2 border-black rounded-md p-2"/>
+                            </div>
+                            <div className="m-3">
+                                <h3 className="text-xl text-black p-2">Email cím</h3>
+                                <input id="email" type="email" placeholder="janos.minta@levelezes.hu" className="bg-white hover:bg-gray-200 h-10 w-full border-2 border-black rounded-md p-2"/>
+                            </div>
+                            <div className="m-3">
+                                <h3 className="text-xl text-black p-2">Telefonszám</h3>
+                                <input id="tel" type="tel" placeholder="+36301234567" className="bg-white hover:bg-gray-200 h-10 w-full border-2 border-black rounded-md p-2"/>
+                            </div>
                         </div>
-                        <div className="m-3">
-                            <h3 className="text-xl text-black p-2">Email cím</h3>
-                            <input type="email" className="bg-white hover:bg-gray-200 h-10 w-full border-2 border-black rounded-md p-2"/>
-                        </div>
-                        <div className="m-3">
-                            <h3 className="text-xl text-black p-2">Telefonszám</h3>
-                            <input type="tel" className="bg-white hover:bg-gray-200 h-10 w-full border-2 border-black rounded-md p-2"/>
-                        </div>
-                    </div>
-                    <div className="flex-col flex-2/3 items-center">
-                        <Educations/>
-                        <Certifications/>
-                        <WorkExperiences/>
-                        <OtherFields/>
+                    </Form>
+                    <div className="flex-col flex-2/3 items-center border-l-3  border-lime-900">
+                        <DataItemList name={"Tanulmányok"} apiEndpoint={"/educations"} items={educationsPromise}/>
+                        <DataItemList name={"Képzettségek"} apiEndpoint={"/certifications"} items={certificationsPromise}/>
+                        <DataItemList name={"Munkatapasztalatok"} apiEndpoint={"/work-experiences"} items={workExperiencesPromise}/>
+                        <DataItemList name={"Egyebek"} apiEndpoint={"/other-fields"} items={otherFieldsPromise}/>
                     </div>
 
                 </div>

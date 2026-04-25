@@ -7,31 +7,15 @@
 
 html,
 body {
-  @apply bg-white dark:bg-gray-500;
+  @apply bg-lime-100 dark:bg-lime-100;
 
-  background-color: white;
-  opacity: 0.8;
-  background-image:  radial-gradient(oklch(84.1% 0.238 128.85) 1.25px, transparent 1.25px), radial-gradient(oklch(84.1% 0.238 128.85) 1.25px, white 1.25px);
-  background-size: 50px 50px;
-  background-position: 0 0,25px 25px;
-
-  @media (prefers-color-scheme: dark) {
+  @media (prefers-color-scheme: light) {
     color-scheme: light;
   }
 }
 
 button.navbutton
 {
-   @apply text-black border-black p-5 m-5 border-2 rounded-md w-80 bg-lime-400 hover:bg-lime-500;
-}
-
-button.endsession
-{
-  @apply text-black border-black p-2 m-5 border-2 rounded-full bg-red-600 hover:bg-red-700;
-}
-
-button.backbutton
-{
-  @apply text-black border-black p-2 m-5 border-2 rounded-full bg-gray-600 hover:bg-gray-700;
+   @apply text-black border-lime-900 p-3 m-5 border-2 rounded-xl w-100 bg-lime-400 hover:bg-lime-500;
 }
 

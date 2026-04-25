@@ -1,6 +1,7 @@
 import type { Route } from "./+types/home";
-import {Link, useNavigate} from "react-router";
+import {Link, redirect, useNavigate} from "react-router";
 import {TopBar} from "~/components/topBar";
+import axios from "axios";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -8,6 +9,16 @@ export function meta({}: Route.MetaArgs) {
     { name: "description", content: "This page can be used to download the completed resume." },
   ];
 }
+
+export async function clientLoader()
+{
+    await axios.get("http://localhost:8080/api/v1/session/get",{withCredentials:true}).catch(err =>{
+        console.log("No valid session in progress, rerouting");
+        throw redirect("/");
+    });
+}
+
+clientLoader.hydrate = true as const;
 
 export default function Download() {
     const navigate = useNavigate();

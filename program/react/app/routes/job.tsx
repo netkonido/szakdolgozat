@@ -1,6 +1,7 @@
 import type { Route } from "./+types/home";
-import {Link, useNavigate} from "react-router";
+import {Link, redirect, useNavigate} from "react-router";
 import {TopBar} from "~/components/topBar";
+import axios from "axios";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -8,6 +9,24 @@ export function meta({}: Route.MetaArgs) {
     { name: "description", content: "This page can be used to enter the job description." },
   ];
 }
+
+export async function clientLoader()
+{
+    await axios.get("http://localhost:8080/api/v1/session/get",{withCredentials:true}).catch(err =>{
+        console.log("No valid session in progress, rerouting");
+        throw redirect("/");
+    });
+
+    const result = await axios.get('http://localhost:8080/api/v1/data/job-description', {withCredentials: true}).then(res => res.data).catch(err => err);
+    console.log(result.toString());
+    if (result.toString() === "")
+    {
+        await axios.post('http://localhost:8080/api/v1/data/job-description',{content:"",}, {withCredentials: true, headers:{"Content-Type": "multipart/form-data"}}).then(res => res.data).catch(err => err);
+    }
+
+}
+
+clientLoader.hydrate = true as const;
 
 export default function JobDescription() {
     const navigate = useNavigate();
