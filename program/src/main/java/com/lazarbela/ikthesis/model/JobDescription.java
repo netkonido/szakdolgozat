@@ -14,6 +14,7 @@ public class JobDescription {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    @Lob
     private String content;
 
     @JsonBackReference

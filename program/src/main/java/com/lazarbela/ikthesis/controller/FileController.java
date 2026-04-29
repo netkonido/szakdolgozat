@@ -1,8 +1,10 @@
 package com.lazarbela.ikthesis.controller;
 
 import com.lazarbela.ikthesis.model.FileMetadata;
+import com.lazarbela.ikthesis.model.Session;
 import com.lazarbela.ikthesis.service.DataService;
 import com.lazarbela.ikthesis.service.FileService;
+import com.lazarbela.ikthesis.service.SessionService;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +26,7 @@ public class FileController {
 
     private final FileService fileService;
     private final DataService dataService;
+    private final SessionService sessionService;
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadFile(@CookieValue("sessionId") String sessionId, @RequestParam("file")MultipartFile file)
@@ -45,17 +48,18 @@ public class FileController {
     }
 
     // redo to only allow resume download
-    @GetMapping("/download")
-    public ResponseEntity<Resource> downloadFile(@CookieValue("sessionId") String sessionId)
+    @GetMapping("/download/{fileType}")
+    public ResponseEntity<Resource> downloadFile(@CookieValue("sessionId") String sessionId, @PathVariable("fileType") String fileType)
     {
         try {
-            FileMetadata metadata = fileService.getFileMetadata(sessionId);
-            Resource resource = fileService.getFileResource(sessionId);
+            Session session = sessionService.getSessionById(sessionId);
+            FileMetadata metadata = fileService.getFileMetadata(sessionId + "." + fileType);
+            Resource resource = fileService.getFileResource(metadata.getStoredName());
             return ResponseEntity
                     .ok()
                     .header(
                             HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=\"" + metadata.getOriginalName() + "\""
+                            "attachment; filename=\"Resume " + session.getUserData().getName() + "." + fileType + "\""
                     )
                     .contentType(MediaType.parseMediaType(metadata.getMimeType()))
                     .contentLength(metadata.getSize())
@@ -70,7 +74,7 @@ public class FileController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteFile(@RequestParam("fileName") String fileName, @CookieValue("sessionId") String sessionId)
+    public ResponseEntity<?> deleteFile(@RequestParam("id") String fileName, @CookieValue("sessionId") String sessionId)
     {
         try
         {
@@ -79,7 +83,7 @@ public class FileController {
             {
                 throw new SecurityException("Access denied.");
             }
-            return ResponseEntity.ok(Map.ofEntries(Map.entry("fileId", metadata.getStoredName()), Map.entry("originalName", metadata.getOriginalName())));
+            return ResponseEntity.ok(Map.ofEntries(Map.entry("id", metadata.getStoredName()), Map.entry("originalName", metadata.getOriginalName())));
         }
         catch (IOException e)
         {
@@ -92,7 +96,7 @@ public class FileController {
         try
         {
             Set<FileMetadata> deletedFiles = fileService.deleteSessionFiles(sessionId);
-            return ResponseEntity.ok(deletedFiles.stream().map((item) -> Map.entry("fileName", item.getOriginalName())));
+            return ResponseEntity.ok(deletedFiles.stream().map((item) -> Map.entry("originalName", item.getOriginalName())));
         }
         catch (IOException e)
         {
@@ -112,8 +116,9 @@ public class FileController {
                     .stream().map(
                             (item) ->
                                     Map.ofEntries(
+                                            Map.entry("id", item.getStoredName()),
                                             Map.entry("originalName", item.getOriginalName()),
-                                            Map.entry("fileId", item.getStoredName())
+                                            Map.entry("size", item.getSize())
                                     )
                     )
             );

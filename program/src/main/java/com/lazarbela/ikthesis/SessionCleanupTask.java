@@ -1,6 +1,7 @@
 package com.lazarbela.ikthesis;
 
 import com.lazarbela.ikthesis.service.DataService;
+import com.lazarbela.ikthesis.service.FileService;
 import com.lazarbela.ikthesis.service.SessionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,28 +20,37 @@ public class SessionCleanupTask {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
     private final SessionService sessionService;
+    private final FileService fileService;
 
     private static final Duration sessionTimeout = Duration.ofMinutes(10);
 
     @Autowired
-    public SessionCleanupTask(SessionService sessionService) {
+    public SessionCleanupTask(SessionService sessionService, FileService fileService) {
         this.sessionService = sessionService;
+        this.fileService = fileService;
     }
 
     @Scheduled(fixedRate = 60_000) //every minute
     public void cleanupSessions() {
-        log.info("Started cleanup of sessions at {}", dateFormat.format(new Date()));
+        log.info("Running session cleanup at {}.", dateFormat.format(new Date()));
         try
         {
             Set<String> deletedSessions = sessionService.deleteOldSessions(sessionTimeout);
-            log.info("Cleaned up {} sessions.", (long) deletedSessions.size());
-            if(!deletedSessions.isEmpty())
-                log.info("Session ids: {}", deletedSessions);
+            if(!deletedSessions.isEmpty()) {
+                log.info("Removed {} sessions. Ids:", (long) deletedSessions.size());
+                for(String id : deletedSessions)
+                {
+                    log.info(id);
+                }
+            }
+            else {
+                log.info("No sessions to remove");
+            }
+
+            log.info(fileService.cleanFileStorage(sessionService.getSessionIds()));
+
         } catch (Exception e) {
-            log.error("Encountered an error while cleaning up sessions: {}", e.getMessage());
-        }
-        finally{
-            log.info("Finished cleanup of sessions at {}", dateFormat.format(new Date()));
+            log.error("Session cleanup at {} encountered an error: {}", dateFormat.format(new Date()), e.getMessage());
         }
     }
 }

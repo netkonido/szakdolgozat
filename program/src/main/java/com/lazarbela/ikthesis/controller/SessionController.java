@@ -61,4 +61,36 @@ public class SessionController {
 
         return ResponseEntity.status(HttpStatus.OK).header(HttpHeaders.SET_COOKIE, "").body(session);
     }
+
+    @GetMapping("/resume-preview")
+    public ResponseEntity<?> resumePreview(@CookieValue("sessionId") String sessionId)
+    {
+        Session session;
+        try{
+            session = sessionService.getSessionById(sessionId);
+        }
+        catch (IllegalArgumentException e)
+        {
+            return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok(session.getResumePreviewString());
+    }
+
+    @PostMapping("/resume-preview")
+    public ResponseEntity<?> postResumePreview(
+            @CookieValue("sessionId") String sessionId,
+            @RequestParam("content") String content)
+    {
+        try{
+            Session session = sessionService.getSessionById(sessionId);
+            session.setResumePreviewString(content);
+            return ResponseEntity.ok(sessionService.saveSession(session));
+        }
+        catch(IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }

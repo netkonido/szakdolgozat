@@ -6,6 +6,7 @@ import lombok.*;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
 public class WorkExperience {
     @Id
@@ -19,8 +20,10 @@ public class WorkExperience {
     private Session session;
 
 
-    public WorkExperience (String content)
+    public WorkExperience (Session session, String content)
     {
+
         this.content = content;
+        this.session = session;
     }
 }

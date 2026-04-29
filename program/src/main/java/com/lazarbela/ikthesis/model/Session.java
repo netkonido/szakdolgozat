@@ -1,5 +1,6 @@
 package com.lazarbela.ikthesis.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,6 +26,12 @@ public class Session {
     private String sessionId;
 
     private Instant timestamp;
+
+    private String profileLink;
+
+    @JsonIgnore
+    @Lob
+    private String resumePreviewString;
 
     @JsonManagedReference
     @OneToOne(mappedBy = "session", cascade = CascadeType.ALL)

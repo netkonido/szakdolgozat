@@ -6,6 +6,7 @@ import lombok.*;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
 public class Certification {
     @Id

@@ -2,6 +2,7 @@ package com.lazarbela.ikthesis.service;
 
 import com.lazarbela.ikthesis.model.Session;
 import com.lazarbela.ikthesis.repository.SessionRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class SessionService {
@@ -48,18 +50,21 @@ public class SessionService {
 
         return session.get();
     }
+
+    public Session saveSession(Session session)
+    {
+        session.setTimestamp(Instant.now());
+        return sessionRepository.save(session);
+    }
+
     public Session updateSessionTimestamp(Session session)
     {
         session.setTimestamp(Instant.now());
         return sessionRepository.save(session);
     }
 
-    public Session updateSessionTimestamp(String sessionId)
-    {
-        return updateSessionTimestamp(getSessionById(sessionId));
-    }
-
-    public Set<String> deleteOldSessions(Duration timeout)
+    @Transactional
+    public Set<String> deleteOldSessions(Duration timeout) throws IOException
     {
         Set<String> deletedSessions = new HashSet<String>();
         List<Session> sessions = sessionRepository.findAll();
@@ -68,10 +73,16 @@ public class SessionService {
             Instant latestSessionTimestamp = session.getTimestamp();
             if(Instant.now().minus(timeout).isAfter(latestSessionTimestamp))
             {
+                fileService.deleteSessionFiles(session.getSessionId());
                 sessionRepository.delete(session);
                 deletedSessions.add(session.getSessionId());
             }
         }
         return deletedSessions;
+    }
+
+    public Set<String> getSessionIds()
+    {
+        return sessionRepository.findAll().stream().map(Session::getSessionId).collect(Collectors.toSet());
     }
 }

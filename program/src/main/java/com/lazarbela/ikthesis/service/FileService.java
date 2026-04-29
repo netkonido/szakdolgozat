@@ -102,11 +102,22 @@ public class FileService {
         Set<FileMetadata> deletedFiles = new HashSet<>();
         for(FileMetadata metadata : filesToDelete)
         {
+            try {
                 storageService.deleteFile(metadata.getStoredPath());
                 repository.delete(metadata);
                 deletedFiles.add(metadata);
+            }
+            catch (IOException e)
+            {
+                System.err.println("Could not delete file " +metadata.getStoredPath());
+            }
         }
         storageService.deleteSessionFolder(sessionId);
         return deletedFiles;
+    }
+
+    public String cleanFileStorage(Set<String> validSessionIds)
+    {
+        return storageService.cleanStorageFolder(validSessionIds);
     }
 }

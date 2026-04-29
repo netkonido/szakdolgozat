@@ -61,8 +61,8 @@ public class DataController {
 
     @PatchMapping("/job-description")
     public ResponseEntity<JobDescription> updateJobDescription(
-            @CookieValue String sessionId,
-            @RequestParam String content
+            @CookieValue("sessionId") String sessionId,
+            @RequestParam("content") String content
     ) {
         try {
             JobDescription updated = dataService.updateJobDescription(sessionId, content);
