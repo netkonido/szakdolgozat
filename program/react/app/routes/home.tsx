@@ -6,8 +6,8 @@ import axios from "axios";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Resume Generator" },
-    { name: "description", content: "Welcome to Resume Generator!" },
+    { title: "Önéletrajz generátor" },
+    { name: "description", content: "Ez az önéletrajz generátor nyitólapja" },
   ];
 }
 
@@ -22,9 +22,9 @@ export default function Home(props: Route.ComponentProps) {
     const action = useFormAction();
     return (
           <div className="flex flex-col items-center bg-lime-300">
-              <h1 className="text-5xl font-semibold p-10 text-black">Kiberbiztonsági önéletrajz generátor</h1>
+              <h1 className="text-5xl font-semibold p-10 text-black">Kiberbiztonsági Önéletrajz Generátor</h1>
               <div className="flex items-stretch w-full h-full">
-                  {[1,2,3,4].map((num) =>(<div className="flex flex-1 h-150 bg-lime-400 p-5 m-10 content-center text-center items-center"> <h1 className="text-5xl text-center w-full font-bold">{num}</h1></div>))}
+                  {[1,2,3,4].map((num) =>(<div key={num} className="flex flex-1 h-150 bg-lime-400 p-5 m-10 content-center text-center items-center"> <h1 className="text-5xl text-center w-full font-bold">{num}</h1></div>))}
               </div>
               <button type="button" className="navbutton" onClick={(e) => {
                     e.preventDefault();

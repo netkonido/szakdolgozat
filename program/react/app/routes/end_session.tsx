@@ -4,8 +4,8 @@ import axios from "axios";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "End Session" },
-    { name: "description", content: "This page can be used to end the current session and delete all user data." },
+    { title: "Munkamenet Megszakítása" },
+    { name: "description", content: "Ezen az oldalon megszakíthatja a munkamenetet, ezzel törölve az összes megadott adatot." },
   ];
 }
 
@@ -23,7 +23,7 @@ export default function EndSession() {
     const navigate = useNavigate();
     return (
         <div className="flex-col items-center  bg-lime-300 p-5">
-            <h1 className="text-7xl text-black font-semibold p-5 text-center">Munkamenet megszakítása</h1>
+            <h1 className="text-7xl text-black font-semibold p-5 text-center">Munkamenet Megszakítása</h1>
             <div className="flex justify-center p-10">
                 <button className="navbutton" onClick={e =>{e.preventDefault()
                 navigate(-1)}}>Mégse</button>

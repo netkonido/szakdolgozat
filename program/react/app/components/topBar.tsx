@@ -25,7 +25,7 @@ export function TopBar({
                 <button type="button" className="text-white font-bold border-lime-900 p-2 m-5 border-2 rounded-xl bg-red-600 hover:bg-red-700" onClick={e=>{
                     e.preventDefault()
                     navigate("/end-session");
-                }}>Munkamenet megszakítása
+                }}>Munkamenet Megszakítása
                 </button>
             </div>
         </div>

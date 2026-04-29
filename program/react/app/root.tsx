@@ -9,7 +9,6 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import { TopBar } from "./components/topBar";
 import {BottomBar} from "~/components/bottomBar";
 
 export const links: Route.LinksFunction = () => [

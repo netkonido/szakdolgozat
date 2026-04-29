@@ -1,15 +1,16 @@
 import {Form, redirect, useLoaderData, useNavigate} from "react-router";
 import {TopBar} from "~/components/topBar";
-import type {Route} from "../../.react-router/types/app/+types/root";
+import type {Route} from "../../../.react-router/types/app/+types/root";
 import DataItemList from "~/components/data_item_list";
 import axios from "axios";
+import {useState} from "react";
 
 type Item = { id: number; content: string };
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Adatbevitel" },
-    { name: "description", content: "Ezen az oldalon felviheti a felhasználó a ." },
+    { title: "Adatok Bevitele" },
+    { name: "description", content: "Ezen az oldalon felviheti az adatait" },
   ];
 }
 
@@ -20,11 +21,14 @@ export async function clientLoader(args:Route.ClientLoaderArgs)
         throw redirect("/");
     });
 
-    const result = await axios.get('http://localhost:8080/api/v1/data/user-data', {withCredentials: true}).then(res => res.data).catch(err => err);
-    if (result.toString() === "")
+    let userData = await axios.get('http://localhost:8080/api/v1/data/user-data', {withCredentials: true})
+        .then(res => res.data)
+        .catch(err => console.log("Error fetching user data: " + err.toString()));
+    if (userData.toString() === "")
     {
-        console.log("posted user data")
-        await axios.post('http://localhost:8080/api/v1/data/user-data',{name:"", email:"", telephone:"",}, {withCredentials: true, headers:{"Content-Type": "multipart/form-data"}}).then(res => res.data).catch(err => err);
+        userData = await axios.post('http://localhost:8080/api/v1/data/user-data',{name:"", email:"", telephone:"",}, {withCredentials: true, headers:{"Content-Type": "multipart/form-data"}})
+            .then(res => res.data)
+            .catch(err => err);
     }
 
     let certificationsPromise = axios.get<Item[]>(`http://localhost:8080/api/v1/data/certifications`,{withCredentials: true}).then(res => res.data).catch(res => console.log(res));
@@ -32,13 +36,16 @@ export async function clientLoader(args:Route.ClientLoaderArgs)
     let workExperiencesPromise = axios.get<Item[]>(`http://localhost:8080/api/v1/data/work-experiences`,{withCredentials: true}).then(res => res.data).catch(res => console.log(res));
     let otherFieldsPromise = axios.get<Item[]>(`http://localhost:8080/api/v1/data/other-fields`,{withCredentials: true}).then(res => res.data).catch(res => console.log(res));
 
-    return { certificationsPromise, educationsPromise, workExperiencesPromise, otherFieldsPromise};
+    return { certificationsPromise, educationsPromise, workExperiencesPromise, otherFieldsPromise, userData};
 }
 clientLoader.hydrate = true as const;
 
 export default function Data({loaderData,}:Route.ComponentProps) {
     const navigate = useNavigate();
-    let { certificationsPromise, educationsPromise, workExperiencesPromise, otherFieldsPromise } = useLoaderData();
+    let { certificationsPromise, educationsPromise, workExperiencesPromise, otherFieldsPromise, userData } = useLoaderData();
+    const [nameFieldValue, setNameFieldValue] = useState<string>(userData.name??"");
+    const [emailFieldValue, setEmailFieldValue] = useState<string>(userData.emailAddress?? "");
+    const [telFieldValue, setTelFieldValue] = useState<string>(userData.telephoneNumber?? "");
     return (
         <div>
             <TopBar
@@ -53,13 +60,10 @@ export default function Data({loaderData,}:Route.ComponentProps) {
                     <Form
                         onBlur={e => {
                             e.preventDefault();
-                            const nameInput = e.currentTarget.elements.namedItem("name") as HTMLFormElement;
-                            const emailInput = e.currentTarget.elements.namedItem("email") as HTMLFormElement;
-                            const telInput = e.currentTarget.elements.namedItem("tel") as HTMLFormElement;
                             const formData = {
-                                name: nameInput.value,
-                                email:emailInput.value,
-                                telephone:telInput.value,
+                                name: nameFieldValue,
+                                email:emailFieldValue,
+                                telephone:telFieldValue,
                             }
                             axios.patch('http://localhost:8080/api/v1/data/user-data', formData ,{withCredentials: true, headers:{"Content-Type":"multipart/form-data"}}).then(res => null).catch(err => null);
                         }}>
@@ -67,15 +71,30 @@ export default function Data({loaderData,}:Route.ComponentProps) {
                             <h2 className="text-black text-3xl font-semibold p-3">Alapadatok bevitele</h2>
                             <div className="m-3">
                                 <h3 className="text-xl text-black p-2">Név</h3>
-                                <input id="name" type="text" placeholder="Minta János" className="bg-white hover:bg-gray-200 h-10 w-full border-2 border-black rounded-md p-2"/>
+                                <input type="text" placeholder="Minta János" value={nameFieldValue}
+                                       onChange={e=>{
+                                           e.preventDefault();
+                                           setNameFieldValue(e.target.value)
+                                       }}
+                                       className="bg-white hover:bg-gray-200 h-10 w-full border-2 border-black rounded-md p-2"/>
                             </div>
                             <div className="m-3">
                                 <h3 className="text-xl text-black p-2">Email cím</h3>
-                                <input id="email" type="email" placeholder="janos.minta@levelezes.hu" className="bg-white hover:bg-gray-200 h-10 w-full border-2 border-black rounded-md p-2"/>
+                                <input type="email" placeholder="janos.minta@levelezes.hu" value={emailFieldValue}
+                                       onChange={e=>{
+                                           e.preventDefault();
+                                           setEmailFieldValue(e.target.value);
+                                       }}
+                                       className="bg-white hover:bg-gray-200 h-10 w-full border-2 border-black rounded-md p-2"/>
                             </div>
                             <div className="m-3">
                                 <h3 className="text-xl text-black p-2">Telefonszám</h3>
-                                <input id="tel" type="tel" placeholder="+36301234567" className="bg-white hover:bg-gray-200 h-10 w-full border-2 border-black rounded-md p-2"/>
+                                <input type="tel" placeholder="+36301234567" value={telFieldValue}
+                                       onChange={e=>{
+                                           e.preventDefault();
+                                           setTelFieldValue(e.target.value);
+                                       }}
+                                       className="bg-white hover:bg-gray-200 h-10 w-full border-2 border-black rounded-md p-2"/>
                             </div>
                         </div>
                     </Form>
