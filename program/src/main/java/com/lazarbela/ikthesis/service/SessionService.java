@@ -40,7 +40,7 @@ public class SessionService {
 
     public Session newSession()
     {
-        return sessionRepository.save(new Session()); // todo: use saveAndFlush instead?
+        return sessionRepository.save(new Session());
     }
 
     public void endSession(String sessionId) throws IOException
