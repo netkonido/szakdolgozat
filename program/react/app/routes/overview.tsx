@@ -18,7 +18,7 @@ export async function clientLoader()
         throw redirect("/");
     });
 
-    let resumePreview = axios.get<{content: string}>("http://localhost:8080/api/v1/session/resume-preview",{withCredentials:true})
+    let resumePreview = axios.get<string>("http://localhost:8080/api/v1/session/resume-preview",{withCredentials:true})
         .then(res => res.data)
         .catch(err =>{console.log("failed to fetch resume preview: " +err.toString())});
 
@@ -37,11 +37,11 @@ export default function Overview() {
                 title={"Önéletrajz Áttekintése"}
             />
             <div className="flex flex-col items-center bg-lime-200 pb-10">
-                <div className="flex items-center p-15 ">
-                    <div className="h-200 w-150 border-black border-2 bg-white">
+                <div className="flex items-center justify-center p-15 w-full ">
+                    <div className="h-full w-3/4 border-black border-2 bg-white overflow-scroll">
                         <Suspense fallback={<div className={"animate-pulse"}>Betöltés...</div>}>
                             <Await resolve={resumePreview}>
-                                {result => <div dangerouslySetInnerHTML={result.content}></div>}
+                                {result => <div>{result}</div>}
                             </Await>
                         </Suspense>
                     </div>
@@ -64,14 +64,8 @@ export default function Overview() {
                 <button type="button" className="navbutton" onClick={e => {
                     e.preventDefault();
                     const target = e.currentTarget;
-                    target.disabled = true;
-                    axios.get("http://localhost:8080/api/v1/actions/prepare",{withCredentials:true})
-                        .then(res => {
-                            navigate("/download");
-                        })
-                        .catch(err => console.log("Prepare request failed: "+err.toString()))
-                        .finally(() => {target.disabled = false;});
-                }}>
+                    navigate("/download");
+                    }}>
                     Tovább</button>
                 </div>
             </div>

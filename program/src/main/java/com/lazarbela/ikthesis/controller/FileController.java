@@ -48,23 +48,43 @@ public class FileController {
     }
 
     // redo to only allow resume download
-    @GetMapping("/download/{fileType}")
-    public ResponseEntity<Resource> downloadFile(@CookieValue("sessionId") String sessionId, @PathVariable("fileType") String fileType)
+    @GetMapping("/download-resume/{fileType}")
+    public ResponseEntity<?> downloadResume(@CookieValue("sessionId") String sessionId, @PathVariable("fileType") String fileType)
     {
         try {
             Session session = sessionService.getSessionById(sessionId);
-            FileMetadata metadata = fileService.getFileMetadata(sessionId + "." + fileType);
+
+            Set<String> availableFileTypes = fileService.getAvailableFileTypes(sessionId);
+            if(!availableFileTypes.contains(fileType))
+                return ResponseEntity.badRequest().body("Filetype does not exist");
+
+            FileMetadata metadata = null;
+            try {
+                metadata = session
+                        .getFiles()
+                        .stream()
+                        .filter(fileMetadata -> fileMetadata.isResume()
+                                && fileMetadata
+                                .getMimeType()
+                                .equals(fileService.mimeTypeExtensionMapper(fileType)))
+                        .findFirst()
+                        .orElseThrow(()-> new IllegalArgumentException("No resume found"));
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body(e.getMessage());
+            }
+
             Resource resource = fileService.getFileResource(metadata.getStoredName());
             return ResponseEntity
                     .ok()
                     .header(
                             HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=\"Resume " + session.getUserData().getName() + "." + fileType + "\""
+                            "attachment; filename=\"Resume " + metadata.getOriginalName() + "." + fileType + "\""
                     )
                     .contentType(MediaType.parseMediaType(metadata.getMimeType()))
                     .contentLength(metadata.getSize())
                     .body(resource);
         }
+
         catch (IOException e) {
             return ResponseEntity.internalServerError().build();
         }
@@ -129,5 +149,17 @@ public class FileController {
         catch(Exception e) {
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    @GetMapping("available-file-types")
+    public ResponseEntity<?> getAvailableFileTypes(@CookieValue("sessionId") String sessionId)
+    {
+        try {
+            return ResponseEntity.ok(fileService.getAvailableFileTypes(sessionId));
+        }
+        catch (IllegalArgumentException e){
+            return ResponseEntity.badRequest().build();
+        }
+
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.web.client.RestTemplate;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.*;
@@ -14,18 +15,23 @@ import java.util.stream.Collectors;
 
 @Service
 public class AIService {
+
+    public static final Object resumePreviewWaitObject = new Object();
+
     private final String extractLinkUri = "http://localhost:7860/api/v1/run/extract-linkedin/";
     private final String extractFileUri = "http://localhost:7860/api/v1/run/extract-file?stream=false";
     private final String makeResumeUri = "http://localhost:7860/api/v1/run/make-resume?stream=false";
     private final String apiKey = "sk-T1tTJMRUyN5JshzFyGZTe0KGQMP7-UzU5eDGqtVYa54";
     private final DataService dataService;
     private final FileService fileService;
+    private final SessionService sessionService;
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public AIService(DataService dataService, FileService fileService)
+    public AIService(DataService dataService, FileService fileService, SessionService sessionService)
     {
         this.dataService = dataService;
         this.fileService = fileService;
+        this.sessionService = sessionService;
     }
 
 //    public String extractLinkedInLink (Session session, String link)
@@ -49,7 +55,10 @@ public class AIService {
     {
         Set<String> filePaths = dataService.getFiles(session.getSessionId()).stream().map(fileMetadata -> {
             try {
-                return fileService.getFileResource(fileMetadata.getStoredName()).getFilePath().toAbsolutePath().toString();
+                return fileService.getFileResource(fileMetadata.getStoredName())
+                        .getFilePath()
+                        .toAbsolutePath()
+                        .toString();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -67,15 +76,13 @@ public class AIService {
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode resultOutput = mapper.readTree(response.getBody());
-            JsonNode outputs = resultOutput
+            String list = resultOutput
                     .get("outputs")
                     .get(0)
                     .get("outputs")
                     .get(0)
-                    .get("outputs");
-
-
-            String list = outputs.get("text")
+                    .get("outputs")
+                    .get("text")
                     .get("message").stringValue();
 
             List<HashMap<String, String>> itemsMap = mapper.readValue(list, List.class);
@@ -173,7 +180,43 @@ public class AIService {
                         "input_value", mapper.writeValueAsString(session)
                 )
         );
-        ResponseEntity<String> result = postRequest(makeResumeUri, session.getSessionId(), payload);
-        return result.getBody();
+        ResponseEntity<String> response = postRequest(makeResumeUri, session.getSessionId(), payload);
+
+        JsonNode resultOutput = mapper.readTree(response.getBody());
+        String resultMarkdown = resultOutput
+                .get("outputs")
+                .get(0)
+                .get("outputs")
+                .get(0)
+                .get("outputs")
+                .get("text")
+                .get("message").stringValue();
+
+        String resultHtml = null;
+
+        try {
+            FileMetadata savedMarkdownResume = fileService.saveResume(new ByteArrayInputStream(resultMarkdown.getBytes()), session.getSessionId(), "md", resultMarkdown.getBytes().length);
+            // convert and save other formats as well
+
+        }
+        catch (IOException e){
+            throw new RuntimeException("Could not write output to file");
+        }
+
+        if(resultHtml != null)
+        {
+            session.setResumePreviewString(resultHtml);
+            sessionService.saveSession(session);
+        }
+        else {
+            session.setResumePreviewString(resultMarkdown);
+            sessionService.saveSession(session);
+        }
+
+        synchronized (AIService.resumePreviewWaitObject){
+            AIService.resumePreviewWaitObject.notify();
+        }
+
+        return resultMarkdown;
     }
 }

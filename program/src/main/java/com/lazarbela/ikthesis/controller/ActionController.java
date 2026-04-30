@@ -1,15 +1,17 @@
 package com.lazarbela.ikthesis.controller;
 
-import ch.qos.logback.core.encoder.EchoEncoder;
+import com.lazarbela.ikthesis.model.FileMetadata;
 import com.lazarbela.ikthesis.model.Session;
 import com.lazarbela.ikthesis.service.AIService;
 import com.lazarbela.ikthesis.service.DataService;
+import com.lazarbela.ikthesis.service.FileService;
 import com.lazarbela.ikthesis.service.SessionService;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientException;
+
+import java.io.IOException;
 
 @CrossOrigin(origins="http://localhost:5173/", allowCredentials = "true")
 @RestController
@@ -19,7 +21,7 @@ public class ActionController {
 
     AIService aiService;
     SessionService sessionService;
-    DataService dataService;
+    FileService fileService;
 
     @PostMapping("/import-data")
     public ResponseEntity<?> importData(
@@ -77,13 +79,41 @@ public class ActionController {
             return ResponseEntity.badRequest().build();
         }
 
-        String response = aiService.createResume(session);
-        return ResponseEntity.ok(response);
+        session.getFiles().stream().filter(FileMetadata::isResume).map(metadata-> {
+            try{
+                fileService.deleteFile(metadata.getStoredName());
+            }
+            catch (IOException e){
+                return ResponseEntity.internalServerError().body(e.getMessage());
+            }
+            return metadata;
+        });
+        try{
+            String response = aiService.createResume(session);
+        } catch (RuntimeException e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+
+        return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/prepare")
+    @GetMapping("/prepare-resume")
     public ResponseEntity<?> prepareResume(@CookieValue("sessionId") String sessionId)
     {
+        Session session;
+        try{
+            session = sessionService.getSessionById(sessionId);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        try {
+            aiService.createResume(session);
+        } catch (RuntimeException e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+
         return ResponseEntity.ok().build();
     }
 

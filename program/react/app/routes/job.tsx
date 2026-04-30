@@ -57,7 +57,7 @@ export default function JobDescription() {
                     e.preventDefault();
                     axios.patch(`http://localhost:8080/api/v1/data/job-description`, {"content":jobDescriptionFieldValue}, {withCredentials:true, headers:{"Content-Type":"multipart/form-data"}})
                         .then(res =>{
-                            axios.get("http://localhost:8080/api/v1/actions/regenerate",{withCredentials:true})
+                            axios.get("http://localhost:8080/api/v1/actions/prepare-resume",{withCredentials:true})
                                 .then(res => {
                                 navigate("/overview");
                             })

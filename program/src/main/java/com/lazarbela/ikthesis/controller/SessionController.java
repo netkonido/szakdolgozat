@@ -1,6 +1,7 @@
 package com.lazarbela.ikthesis.controller;
 
 import com.lazarbela.ikthesis.model.Session;
+import com.lazarbela.ikthesis.service.AIService;
 import com.lazarbela.ikthesis.service.DataService;
 import com.lazarbela.ikthesis.service.SessionService;
 import jakarta.servlet.http.Cookie;
@@ -74,6 +75,15 @@ public class SessionController {
             return ResponseEntity.badRequest().build();
         }
 
+        while(session.getResumePreviewString().isBlank()){
+            synchronized (AIService.resumePreviewWaitObject){
+                try {
+                    AIService.resumePreviewWaitObject.wait();
+                } catch (InterruptedException e) {
+                    return ResponseEntity.internalServerError().body("wait interrupted.");
+                }
+            }
+        }
         return ResponseEntity.ok(session.getResumePreviewString());
     }
 

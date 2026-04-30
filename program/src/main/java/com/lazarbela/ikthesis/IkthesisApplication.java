@@ -14,9 +14,4 @@ public class IkthesisApplication {
 		SpringApplication.run(IkthesisApplication.class, args);
 	}
 
-	@Bean
-	public RestClient.Builder getRestClientBuilder(){
-		return RestClient.builder();
-	}
-
 }

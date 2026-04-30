@@ -19,7 +19,6 @@ clientLoader.hydrate = true as const;
 
 export default function Home(props: Route.ComponentProps) {
     const navigate = useNavigate();
-    const action = useFormAction();
     return (
           <div className="flex flex-col items-center bg-lime-300">
               <h1 className="text-5xl font-semibold p-10 text-black">Kiberbiztonsági Önéletrajz Generátor</h1>

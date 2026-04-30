@@ -22,10 +22,9 @@ public class DataService {
     final WorkExperienceRepository workExperienceRepository;
     final JobDescriptionRepository jobDescriptionRepository;
 
-    final FileService fileService;
 
     @Autowired
-    public DataService (CertificationRepository cr, EducationRepository er, FileMetadataRepository fmr, OtherFieldRepository ofr, SessionRepository sr, UserDataRepository udr, WorkExperienceRepository wer, JobDescriptionRepository jdr, FileService fs)
+    public DataService (CertificationRepository cr, EducationRepository er, FileMetadataRepository fmr, OtherFieldRepository ofr, SessionRepository sr, UserDataRepository udr, WorkExperienceRepository wer, JobDescriptionRepository jdr)
     {
         certificationRepository = cr;
         educationRepository = er;
@@ -35,7 +34,6 @@ public class DataService {
         userDataRepository = udr;
         workExperienceRepository = wer;
         jobDescriptionRepository = jdr;
-        fileService = fs;
     }
 
     public Certification getCertification (int certificationId)

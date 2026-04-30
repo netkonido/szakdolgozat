@@ -28,6 +28,7 @@ public class SessionService {
         this.fileService = fileService;
     }
 
+    //use this in dataservice
     public Session getSessionById (String sessionId)
     {
         Optional<Session> session = sessionRepository.findById(sessionId);
@@ -47,13 +48,12 @@ public class SessionService {
 
         fileService.deleteSessionFiles(session.get().getSessionId());
         sessionRepository.delete(session.get());
-
+// remove return value
         return session.get();
     }
 
     public Session saveSession(Session session)
     {
-        session.setTimestamp(Instant.now());
         return sessionRepository.save(session);
     }
 

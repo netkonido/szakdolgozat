@@ -28,7 +28,7 @@ public class LocalFileStorageService {
         Files.createDirectories(storageDirectory);
 
         String ext = getFileExtension(originalName);
-        String storedName = UUID.randomUUID() + (ext.isEmpty() ? "" : "." + ext);
+        String storedName = UUID.randomUUID().toString() + "." + ext;
         Path filePath = storageDirectory.resolve(storedName);
 
         try (OutputStream outputStream = Files.newOutputStream(filePath, StandardOpenOption.CREATE_NEW)) {
@@ -79,8 +79,8 @@ public class LocalFileStorageService {
         Files.delete(filePath);
     }
 
-    public void deleteSessionFolder(String sessionId) throws IOException {
-        Path normalizedFolderPath = rootPath.resolve(sessionId).normalize();
+    public void deleteDirectory(String directoryName) throws IOException {
+        Path normalizedFolderPath = rootPath.resolve(directoryName).normalize();
         if (!Files.exists(normalizedFolderPath))
             return;
         Files.walkFileTree(normalizedFolderPath, new SimpleFileVisitor<>() {
@@ -93,13 +93,13 @@ public class LocalFileStorageService {
         Files.delete(normalizedFolderPath);
     }
 
-    public String cleanStorageFolder(Set<String> validSessionIds) {
+    public String cleanStorageFolder(Set<String> validSubfolders) {
         File[] files = rootPath.toFile().listFiles();
 
         if (files == null)
             return "No directories discovered!";
 
-        Set<File> directories = Stream.of(files).filter(id -> id.isDirectory() && !validSessionIds.contains(id.getName())).collect(Collectors.toSet());
+        Set<File> directories = Stream.of(files).filter(id -> id.isDirectory() && !validSubfolders.contains(id.getName())).collect(Collectors.toSet());
 
         if (directories.isEmpty())
             return "No directories to delete";
@@ -107,7 +107,7 @@ public class LocalFileStorageService {
         System.out.println("directories to purge: " + directories);
         for (File directory : directories) {
             try {
-                deleteSessionFolder(directory.getName());
+                deleteDirectory(directory.getName());
             } catch (IOException e) {
                 System.err.println("An error occurred while deleting directory " + directory.getName());
             }

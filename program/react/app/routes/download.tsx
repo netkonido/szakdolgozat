@@ -1,5 +1,5 @@
 import type { Route } from "./+types/home";
-import {Form, Link, redirect, useNavigate} from "react-router";
+import {Form, Link, redirect, useLoaderData, useNavigate} from "react-router";
 import {TopBar} from "~/components/topBar";
 import axios from "axios";
 import {useState} from "react";
@@ -17,13 +17,25 @@ export async function clientLoader()
         console.log("No valid session in progress, rerouting");
         throw redirect("/");
     });
+
+    const types = await axios.get<string[]>("http://localhost:8080/api/v1/files/available-file-types", {withCredentials:true})
+        .then(res => res.data)
+        .catch(err => {console.log(err); return [];});
+
+    return {types,};
 }
 
 clientLoader.hydrate = true as const;
 
+type selectItemsArgs = {
+    fileType : string,
+}
+
 export default function Download() {
     const navigate = useNavigate();
     const [downloadDisabled, setDownloadDisabled] = useState(false);
+    const [selectedValue, setSelectedValue] = useState<string>();
+    let {types,} = useLoaderData();
     return (
         <div>
             <TopBar
@@ -35,7 +47,7 @@ export default function Download() {
                     e.preventDefault();
                     setDownloadDisabled(true);
                     const select = e.currentTarget.elements.namedItem("fileType") as HTMLFormElement
-                    axios.get(`http://localhost:8080/api/v1/files/download/${select.value}`, {withCredentials:true})
+                    axios.get(`http://localhost:8080/api/v1/files/download-resume/${select.value}`, {withCredentials:true})
                         .catch(err =>{console.log("Could not download file: "+ err.toString())})
                         .finally(()=> {
                             setDownloadDisabled(false);
@@ -43,8 +55,7 @@ export default function Download() {
                 }
                 }>
                     <select id="fileType" className="border-black border-2 rounded-md w-40 bg-white m-5 p-2">
-                        <option value={"pdf"}>PDF</option>
-                        <option value={"docx"}>Docx</option>
+                        {types.map((element : string)=><option key={element} value={element}>{element.toUpperCase()}</option>)}
                     </select>
                     <button type="submit" className="navbutton" disabled={downloadDisabled}>Letöltés</button>
                 </Form>

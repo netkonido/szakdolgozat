@@ -28,4 +28,5 @@ public class FileMetadata {
     private String mimeType;
     private Instant timestamp;
     private long size;
+    private boolean isResume;
 }
