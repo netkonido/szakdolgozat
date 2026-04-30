@@ -19,14 +19,19 @@ public class DataController {
     private final DataService dataService;
     private final SessionService sessionService;
 
+    /**
+     * Retrieves a job description.
+     *
+     * @param sessionId id of the session linked to the job description.
+     * @return {@code JobDescription} linked to the requested session.
+     */
     @GetMapping("/job-description")
-    public ResponseEntity<JobDescription> getJobDescription (@CookieValue("sessionId") String sessionId)
+    public ResponseEntity<JobDescription> getJobDescription(@CookieValue("sessionId") String sessionId)
     {
         try {
             return ResponseEntity.ok(dataService.getJobDescription(sessionId));
         }
-        catch (IllegalArgumentException e)
-        {
+        catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
         catch(Exception e) {
@@ -34,20 +39,26 @@ public class DataController {
         }
     }
 
+    /**
+     * Creates a job description.
+     *
+     * @param sessionId id of the session linked to the new job description.
+     * @param content content of the new job description.
+     * @return the created {@code JobDescription}.
+     */
     @PostMapping("/job-description")
-    public ResponseEntity<JobDescription> postJobDescription (
+    public ResponseEntity<JobDescription> postJobDescription(
             @CookieValue("sessionId") String sessionId,
             @RequestParam("content") String content)
     {
         Session session;
-        try{
+        try {
             session = sessionService.getSessionById(sessionId);
         }
-        catch (IllegalArgumentException e)
-        {
+        catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
-        catch(Exception e) {
+        catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
 
@@ -59,24 +70,34 @@ public class DataController {
         return ResponseEntity.ok(jobDescription);
     }
 
+    /**
+     * Updates a job description.
+     *
+     * @param sessionId id of the session linked to the job description.
+     * @param content new content for the job description.
+     * @return the updated {@code JobDescription}.
+     */
     @PatchMapping("/job-description")
     public ResponseEntity<JobDescription> updateJobDescription(
             @CookieValue("sessionId") String sessionId,
             @RequestParam("content") String content
     ) {
+        JobDescription jobDescriptionUpdated;
+
         try {
-            JobDescription updated = dataService.updateJobDescription(sessionId, content);
-            return ResponseEntity.ok(updated);
+            jobDescriptionUpdated = dataService.updateJobDescription(sessionId, content);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
         catch(Exception e) {
             return ResponseEntity.internalServerError().build();
         }
+
+        return ResponseEntity.ok(jobDescriptionUpdated);
     }
 
     @GetMapping("/user-data")
-    public ResponseEntity<UserData> getUserData (@CookieValue("sessionId") String sessionId)
+    public ResponseEntity<UserData> getUserData(@CookieValue("sessionId") String sessionId)
     {
         try{
             return ResponseEntity.ok(dataService.getUserData(sessionId));

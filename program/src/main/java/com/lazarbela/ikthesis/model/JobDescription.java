@@ -14,6 +14,7 @@ public class JobDescription {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
     @Lob
     private String content;
 
@@ -21,7 +22,6 @@ public class JobDescription {
     @OneToOne
     @JoinColumn(name = "session_id", nullable = false)
     private Session session;
-
 
     public JobDescription(Session session, String content)
     {

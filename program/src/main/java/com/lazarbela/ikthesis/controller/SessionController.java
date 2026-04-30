@@ -111,12 +111,14 @@ public class SessionController {
     }
 
     /**
-     * Returns the resume's preview as a string.
+     * POST request for a resume preview as a string.
      *
      * @param sessionId id of the requested session.
-     * @return {@code ResponseEntity} with status OK and body containing the resume's preview as a string,
-     * if the session exists, {@code ResponseEntity} with status NOT FOUND or INTERNAL SERVER ERROR otherwise.
+     * @param content content of the resume preview as a string.
+     * @return {@code ResponseEntity} with status OK and body containing the session if the session exists,
+     * {@code ResponseEntity} with status BAD REQUEST or INTERNAL SERVER ERROR otherwise.
      */
+    // TODO: teszteles update megtortenik-e?
     @PostMapping("/resume-preview")
     public ResponseEntity<?> postResumePreview(
             @CookieValue("sessionId") String sessionId,
