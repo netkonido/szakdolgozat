@@ -33,13 +33,14 @@ export default function JobDescription() {
     const revalidator = useRevalidator();
     const {jobDescription,} = useLoaderData();
     const [jobDescriptionFieldValue, setJobDescriptionFieldValue] = useState(jobDescription.content??"");
+    const [isLoading, setIsLoading] = useState(false);
     return (
         <div>
             <TopBar
                 title={"Álláshirdetés Megadása"}
             />
             <div className="flex flex-col items-center bg-lime-200">
-                <textarea name="jobDescription" placeholder="Álláshirdetés megadása" value={jobDescriptionFieldValue}
+                <textarea disabled={isLoading} name="jobDescription" placeholder="Álláshirdetés megadása" value={jobDescriptionFieldValue}
                           onChange={(e) => {
                               e.preventDefault();
                               setJobDescriptionFieldValue(e.target.value);
@@ -53,16 +54,19 @@ export default function JobDescription() {
                                   .catch(err => console.log(err));
                           }}
                           className="border-black border-2 rounded-md w-1/2 bg-white hover:bg-gray-200 m-10 h-30"/>
-                <button type="button" className="navbutton" onClick={e => {
+                <button type="button" disabled={isLoading} className="navbutton" onClick={e => {
                     e.preventDefault();
+                    setIsLoading(true);
                     axios.patch(`http://localhost:8080/api/v1/data/job-description`, {"content":jobDescriptionFieldValue}, {withCredentials:true, headers:{"Content-Type":"multipart/form-data"}})
                         .then(res =>{
                             axios.get("http://localhost:8080/api/v1/actions/prepare-resume",{withCredentials:true})
                                 .then(res => {
-                                navigate("/overview");
+                                    setIsLoading(false);
+                                    navigate("/overview");
                             })
                             .catch(err => console.log("Request failed: "+err.toString()))
                             })
+                        .finally();
                 }}>
 
                     Tovább</button>

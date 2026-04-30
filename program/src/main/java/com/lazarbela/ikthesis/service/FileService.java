@@ -4,6 +4,7 @@ import com.lazarbela.ikthesis.model.FileMetadata;
 import com.lazarbela.ikthesis.model.Session;
 import com.lazarbela.ikthesis.repository.FileMetadataRepository;
 import com.lazarbela.ikthesis.repository.SessionRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -51,7 +52,7 @@ public class FileService {
         FileMetadata metadata = FileMetadata.builder()
                 .session(session.get())
                 .timestamp(Instant.now())
-                .storedName(fileName)
+                .fileName(fileName)
                 .originalName(file.getOriginalFilename())
                 .storedPath(storagePath)
                 .mimeType(file.getContentType())
@@ -86,12 +87,33 @@ public class FileService {
         }
     }
 
+    @Transactional
     public FileMetadata deleteFile(String fileName) throws IOException
     {
         FileMetadata metadata = getFileMetadata(fileName);
         storageService.deleteFile(metadata.getStoredPath());
         fileMetadataRepository.delete(metadata);
+        metadata.getSession().getFiles().remove(metadata);
+        metadata.setSession(null);
         return metadata;
+    }
+
+    public void deleteResumes(String sessionId) throws IOException {
+        Set<FileMetadata> sessionResumes = fileMetadataRepository
+                .findAll()
+                .stream()
+                .filter(fileMetadata -> fileMetadata
+                        .getSession()
+                        .getSessionId()
+                        .equals(sessionId)
+                        && fileMetadata
+                        .isResume())
+                .collect(Collectors.toSet());
+
+        for (FileMetadata metadata : sessionResumes)
+        {
+            deleteFile(metadata.getFileName());
+        }
     }
 
     public Set<FileMetadata> deleteSessionFiles(String sessionId) throws IOException
@@ -153,7 +175,7 @@ public class FileService {
         FileMetadata metadata = FileMetadata.builder()
                 .session(session.get())
                 .timestamp(Instant.now())
-                .storedName(fileName)
+                .fileName(fileName)
                 .originalName(session.get().getUserData().getName())
                 .storedPath(storagePath)
                 .mimeType(mimeTypeExtensionMapper(extension))

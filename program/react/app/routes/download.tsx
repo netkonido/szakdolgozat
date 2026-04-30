@@ -47,11 +47,13 @@ export default function Download() {
                     e.preventDefault();
                     setDownloadDisabled(true);
                     const select = e.currentTarget.elements.namedItem("fileType") as HTMLFormElement
-                    axios.get(`http://localhost:8080/api/v1/files/download-resume/${select.value}`, {withCredentials:true})
-                        .catch(err =>{console.log("Could not download file: "+ err.toString())})
-                        .finally(()=> {
-                            setDownloadDisabled(false);
-                        })
+                    const url = `http://localhost:8080/api/v1/files/download-resume/${select.value}`;
+                    const link = document.createElement('a');
+                    link.target = '_blank';
+                    link.href = url;
+                    link.download = 'preferred-filename.file-extension';
+                    link.click();
+                    setDownloadDisabled(false);
                 }
                 }>
                     <select id="fileType" className="border-black border-2 rounded-md w-40 bg-white m-5 p-2">

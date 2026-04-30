@@ -55,7 +55,7 @@ public class AIService {
     {
         Set<String> filePaths = dataService.getFiles(session.getSessionId()).stream().map(fileMetadata -> {
             try {
-                return fileService.getFileResource(fileMetadata.getStoredName())
+                return fileService.getFileResource(fileMetadata.getFileName())
                         .getFilePath()
                         .toAbsolutePath()
                         .toString();

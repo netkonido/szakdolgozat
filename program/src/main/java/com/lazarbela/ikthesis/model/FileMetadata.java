@@ -16,7 +16,7 @@ import java.time.Instant;
 @Entity
 public class FileMetadata {
     @Id
-    private String storedName;
+    private String fileName;
 
     @JsonBackReference
     @ManyToOne
@@ -29,4 +29,5 @@ public class FileMetadata {
     private Instant timestamp;
     private long size;
     private boolean isResume;
+    private boolean isProcessed;
 }

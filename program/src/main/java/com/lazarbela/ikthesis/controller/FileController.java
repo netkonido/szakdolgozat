@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins="http://localhost:5173/", allowCredentials = "true")
 @AllArgsConstructor
@@ -35,7 +36,7 @@ public class FileController {
             FileMetadata metadata = fileService.uploadFile(file, sessionId);
 
             return ResponseEntity.ok(Map.ofEntries(
-                            Map.entry("fileId", metadata.getStoredName()),
+                            Map.entry("fileId", metadata.getFileName()),
                             Map.entry("originalName", metadata.getOriginalName())
                     ));
         }
@@ -73,7 +74,7 @@ public class FileController {
                 return ResponseEntity.badRequest().body(e.getMessage());
             }
 
-            Resource resource = fileService.getFileResource(metadata.getStoredName());
+            Resource resource = fileService.getFileResource(metadata.getFileName());
             return ResponseEntity
                     .ok()
                     .header(
@@ -98,12 +99,22 @@ public class FileController {
     {
         try
         {
-            FileMetadata metadata = fileService.deleteFile(fileName);
-            if(!metadata.getSession().getSessionId().equals(sessionId))
+            Session session = sessionService.getSessionById(sessionId);
+            if(!session
+                    .getFiles()
+                    .stream()
+                    .map(FileMetadata::getFileName)
+                    .collect(Collectors.toSet())
+                    .contains(fileName))
             {
                 throw new SecurityException("Access denied.");
             }
-            return ResponseEntity.ok(Map.ofEntries(Map.entry("id", metadata.getStoredName()), Map.entry("originalName", metadata.getOriginalName())));
+            FileMetadata metadata = fileService.deleteFile(fileName);
+            return ResponseEntity.ok(Map.ofEntries(Map.entry("id", metadata.getFileName()), Map.entry("originalName", metadata.getOriginalName())));
+        }
+        catch(SecurityException e)
+        {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         catch (IOException e)
         {
@@ -131,12 +142,12 @@ public class FileController {
     public ResponseEntity<?> getUploadedFiles (@CookieValue("sessionId") String sessionId)
     {
         try{
-            Set<FileMetadata> files = dataService.getFiles(sessionId);
+            Set<FileMetadata> files = dataService.getFiles(sessionId).stream().filter(fileMetadata -> !fileMetadata.isResume()).collect(Collectors.toSet());
             return ResponseEntity.ok(files
                     .stream().map(
                             (item) ->
                                     Map.ofEntries(
-                                            Map.entry("id", item.getStoredName()),
+                                            Map.entry("id", item.getFileName()),
                                             Map.entry("originalName", item.getOriginalName()),
                                             Map.entry("size", item.getSize())
                                     )
