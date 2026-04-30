@@ -1,5 +1,6 @@
 package com.lazarbela.ikthesis.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,16 +14,18 @@ public class JobDescription {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    @Lob
     private String content;
-    private String sessionId;
 
-    @OneToOne(mappedBy = "jobDescription")
+    @JsonBackReference
+    @OneToOne
+    @JoinColumn(name = "session_id", nullable = false)
     private Session session;
 
 
-    public JobDescription(String sessionId, String content)
+    public JobDescription(Session session, String content)
     {
-        this.sessionId = sessionId;
         this.content = content;
+        this.session = session;
     }
 }

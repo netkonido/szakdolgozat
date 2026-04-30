@@ -1,49 +1,69 @@
 package com.lazarbela.ikthesis.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-@Data
-@NoArgsConstructor
+@Getter
+@Setter
 @AllArgsConstructor
 @Builder
 @Entity
 public class Session {
+
+    public Session()
+    {
+        timestamp = Instant.now();
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String sessionId;
 
     private Instant timestamp;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "userData_id", referencedColumnName = "id")
+    private String profileLink;
+
+    @JsonIgnore
+    @Lob
+    private String resumePreviewString;
+
+    @JsonManagedReference
+    @OneToOne(mappedBy = "session", cascade = CascadeType.ALL)
     private UserData userData;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "jobDescription_id", referencedColumnName = "id")
+    @JsonManagedReference
+    @OneToOne(mappedBy = "session", cascade = CascadeType.ALL)
     private JobDescription jobDescription;
 
+    @JsonManagedReference
     @Singular
-    @OneToMany
-    private List<Certification> certifications;
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL)
+    private Set<Certification> certifications;
 
+    @JsonManagedReference
     @Singular
-    @OneToMany
-    private List<Education> educations;
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL)
+    private Set<Education> educations;
 
+    @JsonManagedReference
     @Singular
-    @OneToMany
-    private List<FileMetadata> files;
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL)
+    private Set<FileMetadata> files;
 
+    @JsonManagedReference
     @Singular
-    @OneToMany
-    private List<OtherField> otherFields;
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL)
+    private Set<OtherField> otherFields;
 
+    @JsonManagedReference
     @Singular
-    @OneToMany
-    private List<WorkExperience> workExperiences;
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL)
+    private Set<WorkExperience> workExperiences;
 
 }

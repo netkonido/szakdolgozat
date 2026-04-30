@@ -1,9 +1,11 @@
 package com.lazarbela.ikthesis.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @Entity
 public class UserData {
@@ -15,23 +17,14 @@ public class UserData {
     private String emailAddress;
     private String telephoneNumber;
 
-    private String sessionId;
 
-    @OneToOne(mappedBy = "userData")
+    @JsonBackReference
+    @OneToOne
+    @JoinColumn(name = "session_id", nullable = false)
     private Session session;
 
-    public UserData (String sessionId, String name, String emailAddress, String telephoneNumber)
+    public UserData (Session session)
     {
-        this.sessionId = sessionId;
-        this.name = name;
-        this.emailAddress = emailAddress;
-        this.telephoneNumber = telephoneNumber;
-    }
-
-    public UserData (String sessionId, String name, String emailAddress)
-    {
-        this.sessionId = sessionId;
-        this.name = name;
-        this.emailAddress = emailAddress;
+        this.session = session;
     }
 }

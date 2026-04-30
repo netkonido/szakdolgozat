@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+html,
+body {
+  @apply bg-lime-100 dark:bg-lime-100;
+
+  @media (prefers-color-scheme: light) {
+    color-scheme: light;
+  }
+}
+
+button.navbutton
+{
+   @apply text-black border-lime-900 p-3 m-5 border-2 rounded-xl w-100 bg-lime-400 hover:bg-lime-500 disabled:bg-gray-500 disabled:animate-pulse;
+}
+

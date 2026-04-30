@@ -1,9 +1,7 @@
 package com.lazarbela.ikthesis.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Data
@@ -15,11 +13,15 @@ public class Certification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String content;
-    private String sessionId;
 
-    public Certification (String sessionId, String content)
+    @JsonBackReference
+    @ManyToOne
+    @JoinColumn(name="session_id", nullable = false)
+    private Session session;
+
+    public Certification (Session session, String content)
     {
         this.content = content;
-        this.sessionId = sessionId;
+        this.session = session;
     }
 }
