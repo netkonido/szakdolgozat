@@ -2,15 +2,11 @@ package com.lazarbela.ikthesis.controller;
 
 import com.lazarbela.ikthesis.model.Session;
 import com.lazarbela.ikthesis.service.AIService;
-import com.lazarbela.ikthesis.service.DataService;
 import com.lazarbela.ikthesis.service.SessionService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.Instant;
 
 @CrossOrigin(origins="http://localhost:5173/", allowCredentials = "true")
 @RestController
@@ -20,87 +16,123 @@ public class SessionController {
 
     private final SessionService sessionService;
 
+    /**
+     * Initializes a new session.
+     *
+     * @return {@code ResponseEntity} with status OK, cookie set in the header
+     * and a body containing the sessionId of the new {@code Session}.
+     */
     @GetMapping("/new")
     public ResponseEntity<?> getNewSession(HttpServletResponse response)
     {
         String sessionId = sessionService.newSession().getSessionId();
-        HttpCookie cookie = ResponseCookie.from("sessionId", sessionId)
-                .httpOnly(true)
-                .path("/")
-                .build();
+
+        HttpCookie cookie = ResponseCookie.from("sessionId", sessionId).httpOnly(true).path("/").build();
+
         return ResponseEntity.status(HttpStatus.OK).header(HttpHeaders.SET_COOKIE, cookie.toString()).body(sessionId);
     }
 
+    /**
+     * GET request for an existing session.
+     *
+     * @param sessionId id of the requested session.
+     * @return {@code ResponseEntity} with status OK, if the session exists,
+     * {@code ResponseEntity} with status NOT FOUND otherwise.
+     */
     @GetMapping("/get")
     public ResponseEntity<?> getExistingSession(@CookieValue("sessionId") String sessionId)
     {
         Session session;
-        try{
+        try {
             session = sessionService.getSessionById(sessionId);
         }
-        catch (IllegalArgumentException e)
-        {
-            return ResponseEntity.badRequest().build();
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(session);
     }
 
+    /**
+     * DELETE operation for a session.
+     *
+     * @param sessionId id of the session to be deleted.
+     * @return {@code ResponseEntity} with status OK
+     * and cookie set to empty string in the header, if session with provided id exists,
+     * {@code ResponseEntity} with status BAD REQUEST or INTERNAL SERVER ERROR otherwise.
+     */
+    // TODO: unit test for service
     @DeleteMapping("/end")
     public ResponseEntity<?> deleteSession(@CookieValue("sessionId") String sessionId)
     {
-        Session session;
         try {
-            session = sessionService.endSession(sessionId);
+            sessionService.endSession(sessionId);
         }
-        catch(IllegalArgumentException e){
+        catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
-        catch(Exception e)
-        {
+        catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
 
-        return ResponseEntity.status(HttpStatus.OK).header(HttpHeaders.SET_COOKIE, "").body(session);
+        return ResponseEntity.status(HttpStatus.OK).header(HttpHeaders.SET_COOKIE, "").build();
     }
 
+    /**
+     * Returns the resume's preview as a string.
+     *
+     * @param sessionId id of the requested session.
+     * @return {@code ResponseEntity} with status OK and body containing the resume's preview as a string,
+     * if the session exists, {@code ResponseEntity} with status NOT FOUND or INTERNAL SERVER ERROR otherwise.
+     */
+    // TODO: unit test for service
     @GetMapping("/resume-preview")
     public ResponseEntity<?> resumePreview(@CookieValue("sessionId") String sessionId)
     {
         Session session;
-        try{
+        try {
             session = sessionService.getSessionById(sessionId);
         }
         catch (IllegalArgumentException e)
         {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
 
-        while(session.getResumePreviewString().isBlank()){
-            synchronized (AIService.resumePreviewWaitObject){
+        while (session.getResumePreviewString().isBlank()) {
+            synchronized (AIService.resumePreviewWaitObject) {
                 try {
                     AIService.resumePreviewWaitObject.wait();
                 } catch (InterruptedException e) {
-                    return ResponseEntity.internalServerError().body("wait interrupted.");
+                    return ResponseEntity.internalServerError().body("Wait interrupted.");
                 }
             }
         }
+
         return ResponseEntity.ok(session.getResumePreviewString());
     }
 
+    /**
+     * Returns the resume's preview as a string.
+     *
+     * @param sessionId id of the requested session.
+     * @return {@code ResponseEntity} with status OK and body containing the resume's preview as a string,
+     * if the session exists, {@code ResponseEntity} with status NOT FOUND or INTERNAL SERVER ERROR otherwise.
+     */
     @PostMapping("/resume-preview")
     public ResponseEntity<?> postResumePreview(
             @CookieValue("sessionId") String sessionId,
             @RequestParam("content") String content)
     {
-        try{
-            Session session = sessionService.getSessionById(sessionId);
+        Session session;
+        try {
+            session = sessionService.getSessionById(sessionId);
             session.setResumePreviewString(content);
-            return ResponseEntity.ok(sessionService.saveSession(session));
         }
-        catch(IllegalArgumentException e) {
+        catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
+
+        return ResponseEntity.ok(sessionService.saveSession(session));
     }
 }

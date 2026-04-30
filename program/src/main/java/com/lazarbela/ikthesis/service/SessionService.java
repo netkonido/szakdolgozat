@@ -38,18 +38,20 @@ public class SessionService {
         return session.get();
     }
 
-    public Session newSession() { return sessionRepository.save(new Session()); }
+    public Session newSession()
+    {
+        return sessionRepository.save(new Session()); // todo: use saveAndFlush instead?
+    }
 
-    public Session endSession(String sessionId) throws IOException
+    public void endSession(String sessionId) throws IOException
     {
         Optional<Session> session = sessionRepository.findById(sessionId);
-        if(session.isEmpty())
+
+        if (session.isEmpty())
             throw new IllegalArgumentException("Session id not found");
 
         fileService.deleteSessionFiles(session.get().getSessionId());
         sessionRepository.delete(session.get());
-// remove return value
-        return session.get();
     }
 
     public Session saveSession(Session session)
