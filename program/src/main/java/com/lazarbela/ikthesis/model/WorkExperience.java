@@ -12,6 +12,7 @@ public class WorkExperience {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
     private String content;
 
     @JsonBackReference
@@ -19,10 +20,8 @@ public class WorkExperience {
     @JoinColumn(name="session_id", nullable = false)
     private Session session;
 
-
     public WorkExperience (Session session, String content)
     {
-
         this.content = content;
         this.session = session;
     }

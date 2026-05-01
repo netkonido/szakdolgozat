@@ -12,6 +12,7 @@ public class Education {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
     private String content;
 
     @JsonBackReference

@@ -5,8 +5,6 @@ import com.lazarbela.ikthesis.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
 
@@ -39,19 +37,27 @@ public class DataService {
     public Certification getCertification (int certificationId)
     {
         Optional<Certification> certification = certificationRepository.findById(certificationId);
+
         if(certification.isEmpty())
             throw new IllegalArgumentException("Certification id not found");
+
         return certification.get();
     }
+
     public Set<Certification> getCertifications (String sessionId)
     {
         Optional<Session> session = sessionRepository.findById(sessionId);
+
         if(session.isEmpty())
             throw new IllegalArgumentException("Session id not found");
+
         return session.get().getCertifications();
     }
 
-    public Certification saveCertification (Certification certification) { return certificationRepository.save(certification); }
+    public Certification saveCertification (Certification certification)
+    {
+        return certificationRepository.save(certification);
+    }
 
     public Certification updateCertification (String sessionId, int certificationId, String newContent)
     {
@@ -279,7 +285,4 @@ public class DataService {
             throw new IllegalArgumentException("Session id not found");
         return session.get().getFiles();
     }
-
-
-
 }

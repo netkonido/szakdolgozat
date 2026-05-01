@@ -1,11 +1,10 @@
 // example: https://spring.io/guides/gs/testing-web
 
-package com.lazarbela.ikthesis.integration.data_controller;
+package com.lazarbela.ikthesis.controller_slice.data_controller;
 
 import com.lazarbela.ikthesis.controller.DataController;
 import com.lazarbela.ikthesis.model.JobDescription;
 import com.lazarbela.ikthesis.model.Session;
-import com.lazarbela.ikthesis.repository.SessionRepository;
 import com.lazarbela.ikthesis.service.SessionService;
 import com.lazarbela.ikthesis.service.DataService;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +19,7 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 import static org.mockito.Mockito.*;
 
 /**
- * Test the web layer by testing {@link DataController}  and its dependencies {@link DataService} and {@link SessionService}
+ * Test the web layer by testing {@link DataController}  and its dependencies {@link DataService} and {@link SessionService}.
  */
 @WebMvcTest(DataController.class)
 @AutoConfigureRestTestClient
@@ -34,9 +33,6 @@ public class DataControllerJobDescriptionTest {
 
     @MockitoBean
     private SessionService sessionService;
-
-    @MockitoBean
-    private SessionRepository repository;
 
     private final String baseUri = "/api/v1/data";
 

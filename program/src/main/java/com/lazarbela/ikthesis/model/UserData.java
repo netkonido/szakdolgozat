@@ -17,7 +17,6 @@ public class UserData {
     private String emailAddress;
     private String telephoneNumber;
 
-
     @JsonBackReference
     @OneToOne
     @JoinColumn(name = "session_id", nullable = false)

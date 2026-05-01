@@ -1,6 +1,6 @@
 // example: https://spring.io/guides/gs/testing-web
 
-package com.lazarbela.ikthesis.integration;
+package com.lazarbela.ikthesis.controller_slice;
 
 import com.lazarbela.ikthesis.controller.SessionController;
 import com.lazarbela.ikthesis.model.Session;
@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,11 +21,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 /**
- * Test the web layer by testing {@link SessionController}  and its dependency {@link SessionService}
+ * Test the web layer by testing {@link SessionController}  and its dependency {@link SessionService}.
  */
 @WebMvcTest(SessionController.class)
 @AutoConfigureRestTestClient
-public class SessionControllerIntegrationTest {
+public class SessionControllerTest {
 
     @Autowired
     private RestTestClient restTestClient;

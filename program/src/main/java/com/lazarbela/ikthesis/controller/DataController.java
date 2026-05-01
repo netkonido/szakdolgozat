@@ -34,7 +34,7 @@ public class DataController {
         catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
-        catch(Exception e) {
+        catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -89,13 +89,19 @@ public class DataController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
-        catch(Exception e) {
+        catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
 
         return ResponseEntity.ok(jobDescriptionUpdated);
     }
 
+    /**
+     * Retrieves user data.
+     *
+     * @param sessionId id of the session linked to the user data.
+     * @return {@code UserData} linked to the requested session.
+     */
     @GetMapping("/user-data")
     public ResponseEntity<UserData> getUserData(@CookieValue("sessionId") String sessionId)
     {
@@ -105,11 +111,20 @@ public class DataController {
         catch (IllegalArgumentException e){
             return ResponseEntity.badRequest().build();
         }
-        catch(Exception e) {
+        catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
     }
 
+    /**
+     * Creates user data.
+     *
+     * @param sessionId id of the session linked to the new user data.
+     * @param name name of the new user.
+     * @param email email address of the new user.
+     * @param telephone telephone number of the new user.
+     * @return the created {@code UserData}.
+     */
     @PostMapping("/user-data")
     public ResponseEntity<UserData> postUserData (
             @CookieValue("sessionId") String sessionId,
@@ -128,14 +143,22 @@ public class DataController {
             dataService.saveUserData(newUserData);
             return ResponseEntity.ok(newUserData);
         }
-        catch(IllegalArgumentException e) {
+        catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
-        catch(Exception e) {
+        catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
     }
 
+    /**
+     * Updates user data.
+     *
+     * @param name new name for the user.
+     * @param email new email address for the new user.
+     * @param telephone new telephone number for the new user.
+     * @return the updated {@code UserData}.
+     */
     @PatchMapping("/user-data")
     public ResponseEntity<UserData> patchUserData (
             @CookieValue("sessionId") String sessionId,
@@ -147,11 +170,17 @@ public class DataController {
             UserData newUserData = dataService.updateUserData(sessionId, name, email, telephone);
             return ResponseEntity.ok(newUserData);
         }
-        catch(Exception e) {
+        catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
     }
 
+    /**
+     * Retrieves certifications.
+     *
+     * @param sessionId id of the session linked to the certifications.
+     * @return {@code Set<Certification>} set of certifications linked to the requested session.
+     */
     @GetMapping("/certifications")
     public ResponseEntity<Set<Certification>> getCertifications (@CookieValue("sessionId") String sessionId)
     {
@@ -166,12 +195,19 @@ public class DataController {
         }
     }
 
+    /**
+     * Creates a certification.
+     *
+     * @param sessionId id of the session linked to the new certification.
+     * @param content of the new certification.
+     * @return the created {@code Certification}.
+     */
     @PostMapping("/certifications")
     public ResponseEntity<Certification> postCertification (
             @CookieValue("sessionId") String sessionId,
             @RequestParam("content") String content)
     {
-        try{
+        try {
             Session session = sessionService.getSessionById(sessionId);
 
             Certification certification = new Certification();
@@ -184,11 +220,19 @@ public class DataController {
         catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
-        catch(Exception e) {
+        catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
     }
 
+    /**
+     * Updates a certification.
+     *
+     * @param sessionId id of the session linked to the certification.
+     * @param certificationId id of the certification.
+     * @param content content of the certification.
+     * @return the updated {@code Certification}.
+     */
     @PatchMapping("/certifications")
     public ResponseEntity<Certification> updateCertification(
             @CookieValue("sessionId") String sessionId,
@@ -200,13 +244,19 @@ public class DataController {
             return ResponseEntity.ok(updated);
         }
         catch (IllegalArgumentException e) {
-                return ResponseEntity.badRequest().build();
-            }
+            return ResponseEntity.badRequest().build();
+        }
         catch(Exception e) {
-                return ResponseEntity.internalServerError().build();
-            }
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
+    /**
+     * Deletes a certification.
+     *
+     * @param sessionId id of the session linked to the certification.
+     * @param certificationId id of the certification.
+     */
     @DeleteMapping("/certifications")
     public ResponseEntity<Void> deleteCertification(
             @CookieValue("sessionId") String sessionId,
@@ -214,16 +264,22 @@ public class DataController {
     ) {
         try {
             dataService.deleteCertification(sessionId, certificationId);
-            return ResponseEntity.noContent().build();
         }
         catch (IllegalArgumentException e) {
-                return ResponseEntity.badRequest().build();
-            }
+            return ResponseEntity.badRequest().build();
+        }
         catch(Exception e) {
-                return ResponseEntity.internalServerError().build();
-            }
+            return ResponseEntity.internalServerError().build();
+        }
+        return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Retrieves educations.
+     *
+     * @param sessionId id of the session linked to the educations.
+     * @return {@code Set<Education>} set of educations linked to the requested session.
+     */
     @GetMapping("/educations")
     public ResponseEntity<Set<Education>> getEducations (@CookieValue("sessionId") String sessionId)
     {
@@ -238,6 +294,13 @@ public class DataController {
         }
     }
 
+    /**
+     * Created an education.
+     *
+     * @param sessionId id of the session linked to the new education.
+     * @param content of the new education.
+     * @return the created {@code Education}.
+     */
     @PostMapping("/educations")
     public ResponseEntity<Education> postEducation (
             @CookieValue("sessionId") String sessionId,
@@ -263,6 +326,14 @@ public class DataController {
 
     }
 
+    /**
+     * Updates an education.
+     *
+     * @param sessionId id of the session linked to the education.
+     * @param educationId id of the education.
+     * @param content content of the education.
+     * @return the updated {@code Education}.
+     */
     @PatchMapping("/educations")
     public ResponseEntity<Education> updateEducation(
             @CookieValue("sessionId") String sessionId,
@@ -281,6 +352,12 @@ public class DataController {
         }
     }
 
+    /**
+     * Deletes an education.
+     *
+     * @param sessionId id of the session linked to the education.
+     * @param educationId id of the education.
+     */
     @DeleteMapping("/educations")
     public ResponseEntity<Void> deleteEducation(
             @CookieValue("sessionId") String sessionId,
@@ -298,6 +375,12 @@ public class DataController {
         }
     }
 
+    /**
+     * Retrieves other fields.
+     *
+     * @param sessionId id of the session linked to the other fields.
+     * @return {@code Set<OtherField>} set of other fields linked to the requested session.
+     */
     @GetMapping("/other-fields")
     public ResponseEntity<Set<OtherField>> getOtherFields (@CookieValue("sessionId") String sessionId)
     {
@@ -312,6 +395,13 @@ public class DataController {
         }
     }
 
+    /**
+     * Creates a new other field.
+     *
+     * @param sessionId id of the session linked to the other field.
+     * @param content of the new other field.
+     * @return the created {@code OtherField}.
+     */
     @PostMapping("/other-fields")
     public ResponseEntity<OtherField> postOtherField (
             @CookieValue("sessionId") String sessionId,
@@ -335,6 +425,14 @@ public class DataController {
         }
     }
 
+    /**
+     * Updates an other field.
+     *
+     * @param sessionId id of the session linked to the other field.
+     * @param otherFieldId id of the other field.
+     * @param content content of the other field.
+     * @return the updated {@code OtherField}.
+     */
     @PatchMapping("/other-fields")
     public ResponseEntity<OtherField> updateOtherField(
             @CookieValue("sessionId") String sessionId,
@@ -353,6 +451,12 @@ public class DataController {
             }
     }
 
+    /**
+     * Deletes an other field.
+     *
+     * @param sessionId id of the session linked to the other field.
+     * @param otherFieldId id of the other field.
+     */
     @DeleteMapping("/other-fields")
     public ResponseEntity<Void> deleteOtherField(
             @CookieValue("sessionId") String sessionId,
@@ -370,6 +474,12 @@ public class DataController {
         }
     }
 
+    /**
+     * Retrieves work experiences.
+     *
+     * @param sessionId id of the session linked to the work experiences.
+     * @return {@code Set<WorkExperience>} set of work experiences linked to the requested session.
+     */
     @GetMapping("/work-experiences")
     public ResponseEntity<Set<WorkExperience>> getWorkExperiences (@CookieValue("sessionId") String sessionId)
     {
@@ -384,6 +494,13 @@ public class DataController {
         }
     }
 
+    /**
+     * Creates a new work experience.
+     *
+     * @param sessionId id of the session linked to the work experience.
+     * @param content of the new work experience.
+     * @return the created {@code WorkExperience}.
+     */
     @PostMapping("/work-experiences")
     public ResponseEntity<WorkExperience> postWorkExperience (
             @CookieValue("sessionId") String sessionId,
@@ -407,6 +524,14 @@ public class DataController {
         }
     }
 
+    /**
+     * Updates work experiences.
+     *
+     * @param sessionId id of the session linked to the work experience.
+     * @param workExperienceId id of the work experience.
+     * @param content content of the work experience.
+     * @return the updated {@code WorkExperience}.
+     */
     @PatchMapping("/work-experiences")
     public ResponseEntity<WorkExperience> updateWorkExperience(
             @CookieValue("sessionId") String sessionId,
@@ -425,6 +550,12 @@ public class DataController {
             }
     }
 
+    /**
+     * Deletes a work experience.
+     *
+     * @param sessionId id of the session linked to the work experience.
+     * @param workExperienceId id of the work experience.
+     */
     @DeleteMapping("/work-experiences")
     public ResponseEntity<Void> deleteWorkExperience(
             @CookieValue("sessionId") String sessionId,
