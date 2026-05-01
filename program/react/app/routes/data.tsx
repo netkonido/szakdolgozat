@@ -1,6 +1,6 @@
 import {Form, redirect, useLoaderData, useNavigate} from "react-router";
 import {TopBar} from "~/components/topBar";
-import type {Route} from "../../../.react-router/types/app/+types/root";
+import type {Route} from "../../.react-router/types/app/+types/root";
 import DataItemList from "~/components/data_item_list";
 import axios from "axios";
 import {useState} from "react";

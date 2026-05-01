@@ -21,7 +21,7 @@ public class IkthesisApplication {
 		return new WebMvcConfigurer() {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
-				registry.addMapping("/api/**")
+				registry.addMapping("/api/v1/**")
 						.allowedOrigins("http://localhost:5173/","http://localhost:3000/")
 						.allowCredentials(true);
 			}

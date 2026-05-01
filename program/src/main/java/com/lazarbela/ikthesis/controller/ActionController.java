@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientException;
 import java.io.IOException;
 
+@CrossOrigin(origins = "http://localhost:3000/,http://localhost:5173/", allowCredentials = "true")
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/actions")
