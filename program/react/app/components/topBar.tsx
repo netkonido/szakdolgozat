@@ -2,7 +2,7 @@ import type {Route} from "../+types/root";
 import {Link, useNavigate} from "react-router";
 
 interface Props {
-    title: string
+    title: string,
 }
 
 export function TopBar({

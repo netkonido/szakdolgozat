@@ -79,7 +79,7 @@ public class FileController {
                     .ok()
                     .header(
                             HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=\"Resume " + metadata.getOriginalName() + "." + fileType + "\""
+                            "attachment; filename=\"" + metadata.getOriginalName() + "\""
                     )
                     .contentType(MediaType.parseMediaType(metadata.getMimeType()))
                     .contentLength(metadata.getSize())
@@ -99,17 +99,12 @@ public class FileController {
     {
         try
         {
-            Session session = sessionService.getSessionById(sessionId);
-            if(!session
-                    .getFiles()
-                    .stream()
-                    .map(FileMetadata::getFileName)
-                    .collect(Collectors.toSet())
-                    .contains(fileName))
+            FileMetadata fileMetadata =fileService.getFileMetadata(fileName);
+            if(!fileMetadata.getSession().getSessionId().equals(sessionId))
             {
                 throw new SecurityException("Access denied.");
             }
-            FileMetadata metadata = fileService.deleteFile(fileName);
+            FileMetadata metadata = fileService.deleteFile(fileMetadata);
             return ResponseEntity.ok(Map.ofEntries(Map.entry("id", metadata.getFileName()), Map.entry("originalName", metadata.getOriginalName())));
         }
         catch(SecurityException e)

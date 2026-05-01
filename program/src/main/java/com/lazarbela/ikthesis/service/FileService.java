@@ -93,8 +93,16 @@ public class FileService {
         FileMetadata metadata = getFileMetadata(fileName);
         storageService.deleteFile(metadata.getStoredPath());
         fileMetadataRepository.delete(metadata);
-        metadata.getSession().getFiles().remove(metadata);
-        metadata.setSession(null);
+        fileMetadataRepository.flush();
+        return metadata;
+    }
+
+    @Transactional
+    public FileMetadata deleteFile(FileMetadata metadata) throws IOException
+    {
+        storageService.deleteFile(metadata.getStoredPath());
+        fileMetadataRepository.delete(metadata);
+        fileMetadataRepository.flush();
         return metadata;
     }
 
@@ -106,14 +114,51 @@ public class FileService {
                         .getSession()
                         .getSessionId()
                         .equals(sessionId)
-                        && fileMetadata
-                        .isResume())
+                        && fileMetadata.isResume())
                 .collect(Collectors.toSet());
 
-        for (FileMetadata metadata : sessionResumes)
-        {
-            deleteFile(metadata.getFileName());
-        }
+        sessionResumes.forEach(fileMetadata -> {
+            try{
+                deleteFile(fileMetadata);
+            }
+            catch (IOException e){
+                System.out.println(fileMetadata.getStoredPath());
+            }
+        });
+    }
+
+    public FileMetadata deleteConvertedResumes(String sessionId) throws IOException{
+        Set<FileMetadata> resumes = fileMetadataRepository
+                .findAll()
+                .stream()
+                .filter(fileMetadata -> fileMetadata
+                            .getSession()
+                            .getSessionId()
+                            .equals(sessionId)
+                && fileMetadata.isResume())
+                .collect(Collectors.toSet());
+
+        FileMetadata markdownResume;
+        markdownResume = resumes
+                .stream()
+                .filter(fileMetadata ->
+                        fileMetadata
+                                .getMimeType()
+                                .equals("text/markdown")
+                )
+                .findFirst()
+                .orElseThrow(()-> new NoSuchElementException("no Markdown resume found"));
+
+        resumes.remove(markdownResume);
+        resumes.forEach(fileMetadata ->{
+            try{
+                deleteFile(fileMetadata);
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                //throw new RuntimeException(e.getMessage());
+            }
+        });
+        return markdownResume;
     }
 
     public Set<FileMetadata> deleteSessionFiles(String sessionId) throws IOException
@@ -152,15 +197,12 @@ public class FileService {
         Session session =maybeSession.get();
 
 
-
-        Set<String> fileTypes = session
+        return session
                 .getFiles()
                 .stream()
                 .filter(FileMetadata::isResume)
                 .map(fileMetadata -> mimeTypeExtensionMapper(fileMetadata.getMimeType()))
                 .collect(Collectors.toSet());
-
-        return fileTypes;
     }
 
     public FileMetadata saveResume(InputStream fileStream, String sessionId, String extension, long fileSize) throws IOException {
@@ -176,7 +218,7 @@ public class FileService {
                 .session(session.get())
                 .timestamp(Instant.now())
                 .fileName(fileName)
-                .originalName(session.get().getUserData().getName())
+                .originalName("Resume " + session.get().getUserData().getName() + "." + extension)
                 .storedPath(storagePath)
                 .mimeType(mimeTypeExtensionMapper(extension))
                 .size(fileSize)
@@ -184,6 +226,40 @@ public class FileService {
                 .build();
 
         return fileMetadataRepository.save(metadata);
+    }
+
+    public Set<FileMetadata> convertResumesFromMarkdown (FileMetadata markdownMetadata) throws IOException
+    {
+        Set<String> formats = Set.of("docx","html");
+        Set<FileMetadata> outputFiles = new HashSet<FileMetadata>();
+        for(String format : formats)
+        {
+
+            Map<String, Long> storageProperties = storageService.convertFile(
+                    markdownMetadata.getSession().getSessionId(),
+                    markdownMetadata.getFileName(),
+                    markdownMetadata.getSession().getUserData().getName() + "." + format,
+                    "markdown" ,
+                    format
+            );
+
+            String storagePath = storageProperties.keySet().stream().findAny().orElse("");
+
+            String fileName = storagePath.substring(storagePath.lastIndexOf(File.separator) + 1);
+            long fileSize = storageProperties.get(storagePath);
+            FileMetadata metadata = FileMetadata.builder()
+                    .session(markdownMetadata.getSession())
+                    .timestamp(Instant.now())
+                    .fileName(fileName)
+                    .originalName("Resume " + markdownMetadata.getSession().getUserData().getName() + "." + format)
+                    .storedPath(storagePath)
+                    .mimeType(mimeTypeExtensionMapper(format))
+                    .size(fileSize)
+                    .isResume(true)
+                    .build();
+            outputFiles.add(fileMetadataRepository.save(metadata));
+        }
+        return outputFiles;
     }
 
     public String mimeTypeExtensionMapper(String from)

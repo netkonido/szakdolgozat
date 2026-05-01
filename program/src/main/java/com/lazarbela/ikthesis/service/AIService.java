@@ -7,8 +7,7 @@ import org.springframework.web.client.RestTemplate;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -192,26 +191,19 @@ public class AIService {
                 .get("text")
                 .get("message").stringValue();
 
-        String resultHtml = null;
-
         try {
-            FileMetadata savedMarkdownResume = fileService.saveResume(new ByteArrayInputStream(resultMarkdown.getBytes()), session.getSessionId(), "md", resultMarkdown.getBytes().length);
-            // convert and save other formats as well
-
+            FileMetadata savedMarkdownResume = fileService.saveResume(new ByteArrayInputStream(
+                    resultMarkdown.getBytes()),
+                    session.getSessionId(),
+                    "md",
+                    resultMarkdown.getBytes().length);
         }
         catch (IOException e){
             throw new RuntimeException("Could not write output to file");
         }
 
-        if(resultHtml != null)
-        {
-            session.setResumePreviewString(resultHtml);
-            sessionService.saveSession(session);
-        }
-        else {
-            session.setResumePreviewString(resultMarkdown);
-            sessionService.saveSession(session);
-        }
+        session.setResumePreviewString(resultMarkdown);
+        sessionService.saveSession(session);
 
         synchronized (AIService.resumePreviewWaitObject){
             AIService.resumePreviewWaitObject.notify();

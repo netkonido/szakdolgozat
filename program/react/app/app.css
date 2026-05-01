@@ -19,3 +19,37 @@ button.navbutton
    @apply text-black border-lime-900 p-3 m-5 border-2 rounded-xl w-100 bg-lime-400 hover:bg-lime-500 disabled:bg-gray-500 disabled:animate-pulse;
 }
 
+div.markdown{
+  @apply h-full w-3/4 border-black border-2 bg-white overflow-scroll;
+}
+
+div.markdown h1 {
+  font-size: xx-large;
+  font-weight: bold;
+  padding-left: 0.5rem;
+}
+
+div.markdown h2 {
+  font-size: large;
+  font-weight: bold;
+  padding-left: 1rem;
+}
+
+div.markdown h3 {
+  font-size: medium;
+  font-weight: bold;
+  padding-left: 1.5rem;
+
+}
+div.markdown ul{
+  padding-left: 2.5rem;
+}
+
+div.markdown p{
+  padding-left: 1.5rem;
+  font-size: small;
+}
+div.markdown hr{
+  margin: 2rem;
+}
+

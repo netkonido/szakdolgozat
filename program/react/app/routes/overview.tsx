@@ -3,6 +3,7 @@ import {Await, Link, redirect, useLoaderData, useNavigate, useRevalidator} from 
 import {TopBar} from "~/components/topBar";
 import axios from "axios";
 import {Suspense} from "react";
+import ReactMarkdown from "react-markdown";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -38,10 +39,10 @@ export default function Overview() {
             />
             <div className="flex flex-col items-center bg-lime-200 pb-10">
                 <div className="flex items-center justify-center p-15 w-full ">
-                    <div className="h-full w-3/4 border-black border-2 bg-white overflow-scroll">
+                    <div className="markdown">
                         <Suspense fallback={<div className={"animate-pulse"}>Betöltés...</div>}>
                             <Await resolve={resumePreview}>
-                                {result => <div>{result}</div>}
+                                {result => <ReactMarkdown>{result}</ReactMarkdown>}
                             </Await>
                         </Suspense>
                     </div>
@@ -52,7 +53,7 @@ export default function Overview() {
                             e.preventDefault();
                             const target= e.currentTarget;
                                 target.disabled = true;
-                            axios.get("http://localhost:8080/api/v1/actions/regenerate",{withCredentials:true})
+                            axios.get("http://localhost:8080/api/v1/actions/regenerate-resume",{withCredentials:true})
                                 .then(res => {
                                     revalidator.revalidate();
                                 })
@@ -63,8 +64,14 @@ export default function Overview() {
                 </button>
                 <button type="button" className="navbutton" onClick={e => {
                     e.preventDefault();
-                    const target = e.currentTarget;
-                    navigate("/download");
+                    const target= e.currentTarget;
+                    target.disabled = true;
+                    axios.get("http://localhost:8080/api/v1/actions/convert-resume",{withCredentials:true})
+                        .then(res => {
+                            navigate("/download")
+                        })
+                        .catch(err => console.log("Regenerate request failed: "+err.toString()))
+                        .finally(() => {target.disabled = false;});
                     }}>
                     Tovább</button>
                 </div>

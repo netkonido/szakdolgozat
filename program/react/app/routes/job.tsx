@@ -65,11 +65,11 @@ export default function JobDescription() {
                                     navigate("/overview");
                             })
                             .catch(err => console.log("Request failed: "+err.toString()))
+                                .finally(()=> setIsLoading(false));
                             })
-                        .finally();
                 }}>
 
-                    Tovább</button>
+                    Generálás</button>
             </div>
         </div>
         );

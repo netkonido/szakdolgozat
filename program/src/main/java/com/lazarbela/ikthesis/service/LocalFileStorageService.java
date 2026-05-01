@@ -8,6 +8,7 @@ import org.springframework.util.StreamUtils;
 import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -36,6 +37,18 @@ public class LocalFileStorageService {
         }
 
         return rootPath.relativize(filePath).toString();
+    }
+
+    public Map<String, Long> convertFile(String sessionId, String sourceFileName, String destinationFileName, String from, String to) throws IOException
+    {
+        ProcessBuilder processBuilder = new ProcessBuilder("pandoc","-f",from, "-t", to, sourceFileName, "-o", "-");
+        processBuilder.directory(rootPath.resolve(sessionId).toFile());
+        String relativeFileStoragePath = "";
+        Process convertProcess = processBuilder.start();
+
+        relativeFileStoragePath = storeFile(convertProcess.getInputStream(), destinationFileName, sessionId);
+
+        return Map.of(relativeFileStoragePath, rootPath.resolve(relativeFileStoragePath).toFile().length());
     }
 
     public Resource getFileResource(String storedPath) throws IOException {

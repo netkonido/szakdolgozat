@@ -9,9 +9,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientException;
-
 import java.io.IOException;
-import java.util.stream.Collectors;
 
 @CrossOrigin(origins="http://localhost:5173/", allowCredentials = "true")
 @RestController
@@ -37,20 +35,6 @@ public class ActionController {
 
         StringBuilder returnString = new StringBuilder();
 
-        returnString.append("Result of link: ");
-        try {
-            //returnString.append(aiService.extractLinkedInLink(session, link));
-        }
-        catch (RestClientException e){
-            return ResponseEntity.internalServerError().body("Could not fetch AI data: " + e.getMessage());
-        }
-        catch(NullPointerException e){
-            return ResponseEntity.internalServerError().body("AI return data is null");
-        }
-        catch (Exception e){
-            return ResponseEntity.internalServerError().body("Other issue: " + e.getMessage());
-        }
-
         returnString.append("Result of files: ");
         try {
             returnString.append( aiService.extractFiles(session));
@@ -68,7 +52,7 @@ public class ActionController {
         return ResponseEntity.ok(returnString.toString());
     }
 
-    @GetMapping("/regenerate")
+    @GetMapping("/regenerate-resume")
     public ResponseEntity<?> regenerateResume(@CookieValue("sessionId") String sessionId)
     {
         Session session;
@@ -86,7 +70,7 @@ public class ActionController {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
         try{
-            String response = aiService.createResume(session);
+            aiService.createResume(session);
         } catch (RuntimeException e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
@@ -118,6 +102,26 @@ public class ActionController {
         }
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/convert-resume")
+    public ResponseEntity<?> convertResumes(@CookieValue("sessionId") String sessionId){
+        try{
+            sessionService.getSessionById(sessionId);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            FileMetadata markdownResume = fileService.deleteConvertedResumes(sessionId);
+            fileService.convertResumesFromMarkdown(markdownResume);
+        }
+        catch (IOException e){
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+
+        return ResponseEntity.ok().build();
+
     }
 
 }
