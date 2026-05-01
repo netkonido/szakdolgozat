@@ -39,11 +39,11 @@ export async function clientLoader() {
 
 clientLoader.hydrate = true as const;
 
-export function FileListItem({metadata,}: {metadata: FileMetadata}) {
+export function FileListItem({metadata,isDisabled}: {metadata: FileMetadata, isDisabled: boolean}) {
     const revalidator = useRevalidator();
     return (
         <div className="flex w-full p-2 align-middle items-center justify-center">
-            <button className="w-1/5 bg-amber-500 hover:bg-amber-600 border border-lime-900 rounded-md h-10 mr-2"
+            <button disabled={isDisabled} className="w-1/5 bg-amber-500 hover:bg-amber-600 border border-lime-900 rounded-md h-10 mr-2 disabled:bg-gray-500"
                     onClick={e => {
                         e.preventDefault();
                         axios.delete("http://localhost:8080/api/v1/files/delete", {
@@ -88,6 +88,7 @@ export default function Import() {
     const [fileCount, setFileCount] = useState(0);
     const [continueButtonText, setContinueButtonText] = useState<string>("Tovább");
     const [isExtractError, setExtractError] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     return (
         <div>
@@ -104,7 +105,7 @@ export default function Import() {
                                 <Await resolve={files}>
                                     {result => {
                                         setFileCount(result.length);
-                                        return result.map((md: FileMetadata) => <FileListItem metadata={md} key={md.id} />);
+                                        return result.map((md: FileMetadata) => <FileListItem isDisabled={isLoading} metadata={md} key={md.id} />);
                                     }}
                                 </Await>
                             </Suspense>
@@ -126,21 +127,21 @@ export default function Import() {
                             e.currentTarget.reset();
 
                         }}>
-                            <input type="file" id="fileInput" required={true} disabled={fileCount>=10}
-                                   accept="application/pdf,application/docx,image/jpeg,image/png"
+                            <input type="file" id="fileInput" required={true} disabled={fileCount>=10 || isLoading}
+                                   accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/markdown,text/html"
                                    placeholder={"File Kiválasztása"}
                                    className="min-w-30 h-10 bg-white hover:bg-gray-200 disabled:bg-gray-500 rounded-l-md border-2 border-r-0 border-lime-900 w-2/3 items-center"/>
-                            <button type="submit" id="submit" disabled={fileCount >= 10}
+                            <button type="submit" id="submit" disabled={fileCount >= 10 || isLoading}
                                     className="h-10 border-2 border-lime-900 rounded-r-md w-1/3 text-nowrap min-w-fit bg-lime-400 hover:bg-lime-500 disabled:bg-gray-500">Feltöltés {fileCount}/10
                             </button>
                         </Form>
                     </div>
                 </div>
-                <button type="button" className="navbutton" onClick={e => {
+                <h2 className="text-red-600 font-bold text-xl bg-yellow-300 rounded-xl text-center m-1" hidden={!isExtractError} >Hiba történt a fileok feldolgozása során!</h2>
+                <button type="button" className="navbutton" disabled={isLoading} onClick={e => {
                     e.preventDefault();
                     setExtractError(false);
-                    const target = e.currentTarget;
-                    target.disabled = true;
+                    setIsLoading(true);
                     setContinueButtonText("Betöltés...")
                     const linkValue = "";
                     axios.post("http://localhost:8080/api/v1/actions/import-data", {"link":linkValue}, {withCredentials: true, headers:{"Content-Type":"multipart/form-data"}})
@@ -151,12 +152,11 @@ export default function Import() {
                             setExtractError(true);})
                         .finally(() => {
                             setContinueButtonText("Tovább");
-                            target.disabled=false;
+                            setIsLoading(false);
                         })
                 }}>
                     {continueButtonText}
                 </button>
-                <h2 className="text-red-600 font-bold text-xl bg-yellow-300 rounded-xl text-center m-1" hidden={!isExtractError} >Hiba történt a link beolvasása során!</h2>
             </div>
         </div>
     );

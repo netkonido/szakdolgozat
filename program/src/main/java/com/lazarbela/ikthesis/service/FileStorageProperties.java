@@ -18,11 +18,9 @@ public record FileStorageProperties(
         this(
                 "./files",
                 Set.of("application/pdf",
-                        "vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                         "text/html",
-                        "text/markdown",
-                        "image/png",
-                        "image/jpeg"),
+                        "text/markdown"),
                 Map.of(
                     "application/pdf","pdf",
                     "pdf","application/pdf",
