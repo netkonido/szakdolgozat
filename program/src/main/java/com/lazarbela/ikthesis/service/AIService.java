@@ -17,7 +17,7 @@ public class AIService {
 
     public static final Object resumePreviewWaitObject = new Object();
 
-    private final String extractLinkUri = "http://localhost:7860/api/v1/run/extract-linkedin/";
+    private final String extractLinkUri = "http://localhost:7860/api/v1/run/extract-linkedin?stream=false";
     private final String extractFileUri = "http://localhost:7860/api/v1/run/extract-file?stream=false";
     private final String makeResumeUri = "http://localhost:7860/api/v1/run/make-resume?stream=false";
     private final String apiKey = "sk-T1tTJMRUyN5JshzFyGZTe0KGQMP7-UzU5eDGqtVYa54";

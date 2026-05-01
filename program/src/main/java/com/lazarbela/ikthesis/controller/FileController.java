@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@CrossOrigin(origins="http://localhost:5173/", allowCredentials = "true")
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/v1/files")

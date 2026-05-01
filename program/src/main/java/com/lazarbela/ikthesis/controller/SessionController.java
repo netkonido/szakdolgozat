@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins="http://localhost:5173/", allowCredentials = "true")
 @RestController
 @RequestMapping("/api/v1/session")
 @AllArgsConstructor
