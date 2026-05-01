@@ -16,12 +16,6 @@ public class IkthesisApplication {
 		SpringApplication.run(IkthesisApplication.class, args);
 	}
 
-	@Value("${corsOrigin.dev}")
-	private String corsDevOrigin;
-
-	@Value("${corsOrigin.start}")
-	private String corsStartOrigin;
-
 	@Bean
 	public WebMvcConfigurer corsConfigurer() {
 		return new WebMvcConfigurer() {
