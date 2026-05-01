@@ -157,7 +157,7 @@ public class FileController {
         }
     }
 
-    @GetMapping("available-file-types")
+    @GetMapping("/available-file-types")
     public ResponseEntity<?> getAvailableFileTypes(@CookieValue("sessionId") String sessionId)
     {
         try {

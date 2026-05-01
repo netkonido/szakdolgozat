@@ -129,17 +129,26 @@ public class AIService {
         int we = 0;
         int of = 0;
         int err = 0;
+
+        UserData userData = session.getUserData();
+        if(userData == null){
+            userData = new UserData(session);
+        }
+
         for(ReturnDataItem item : returnDataItems)
         {
             switch(item.Type())
             {
                 case "name":
-                    UserData userData = session.getUserData();
-                    if(userData == null){
-                        userData = new UserData(session);
-                    }
                     userData.setName(item.Content());
-                    dataService.saveUserData(userData);
+                    ud++;
+                    break;
+                case "email":
+                    userData.setEmailAddress(item.Content());
+                    ud++;
+                    break;
+                case "tel":
+                    userData.setTelephoneNumber(item.Content());
                     ud++;
                     break;
                 case "certification":
@@ -168,6 +177,8 @@ public class AIService {
                     break;
             }
         }
+        dataService.saveUserData(userData);
+
         return(MessageFormat.format("Of {0} entries: {1} user data, {2} certification, {3} education, {4} other field, {5} work experience, with {6} not matching", returnDataItems.size(), ud, c, e, of, we, err));
     }
 
