@@ -65,6 +65,18 @@ public class SessionService {
         return sessionRepository.save(session);
     }
 
+    public Session updateSessionTimestamp(String sessionId)
+    {
+        Optional<Session> session = sessionRepository.findById(sessionId);
+
+        if (session.isEmpty())
+            throw new IllegalArgumentException("Session id not found");
+
+        session.get().setTimestamp(Instant.now());
+
+        return sessionRepository.save(session.get());
+    }
+
     @Transactional
     public Set<String> deleteOldSessions(Duration timeout) throws IOException
     {

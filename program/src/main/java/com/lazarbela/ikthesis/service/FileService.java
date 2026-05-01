@@ -190,7 +190,7 @@ public class FileService {
         return storageService.cleanStorageFolder(validSessionIds);
     }
 
-    public Set<String> getAvailableFileTypes(String sessionId){
+    public Set<String> getAvailableResumeFileTypes(String sessionId){
         Optional<Session> maybeSession = sessionRepository.findById(sessionId);
         if(maybeSession.isEmpty())
             throw new IllegalArgumentException("Session id not found");

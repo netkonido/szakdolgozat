@@ -29,50 +29,57 @@ public class FileController {
     private final SessionService sessionService;
 
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadFile(@CookieValue("sessionId") String sessionId, @RequestParam("file")MultipartFile file)
+    public ResponseEntity<?> uploadFile(
+            @CookieValue("sessionId") String sessionId,
+            @RequestParam("file")MultipartFile file)
     {
         try{
             FileMetadata metadata = fileService.uploadFile(file, sessionId);
-
             return ResponseEntity.ok(Map.ofEntries(
-                            Map.entry("fileId", metadata.getFileName()),
-                            Map.entry("originalName", metadata.getOriginalName())
-                    ));
+                    Map.entry("fileId", metadata.getFileName()),
+                    Map.entry("originalName", metadata.getOriginalName())
+            ));
         }
         catch (IOException e) {
             return ResponseEntity.internalServerError().build();
         }
         catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
     }
 
-    // redo to only allow resume download
     @GetMapping("/download-resume/{fileType}")
-    public ResponseEntity<?> downloadResume(@CookieValue("sessionId") String sessionId, @PathVariable("fileType") String fileType)
+    public ResponseEntity<?> downloadResume(
+            @CookieValue("sessionId") String sessionId,
+            @PathVariable("fileType") String fileType)
     {
+        Session session;
         try {
-            Session session = sessionService.getSessionById(sessionId);
+            session = sessionService.getSessionById(sessionId);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Invalid session id");
+        }
 
-            Set<String> availableFileTypes = fileService.getAvailableFileTypes(sessionId);
-            if(!availableFileTypes.contains(fileType))
-                return ResponseEntity.badRequest().body("Filetype does not exist");
+        Set<String> availableFileTypes = fileService.getAvailableResumeFileTypes(sessionId);
+        if (!availableFileTypes.contains(fileType))
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Filetype does not exist");
 
-            FileMetadata metadata = null;
-            try {
-                metadata = session
-                        .getFiles()
-                        .stream()
-                        .filter(fileMetadata -> fileMetadata.isResume()
-                                && fileMetadata
-                                .getMimeType()
-                                .equals(fileService.mimeTypeExtensionMapper(fileType)))
-                        .findFirst()
-                        .orElseThrow(()-> new IllegalArgumentException("No resume found"));
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.badRequest().body(e.getMessage());
-            }
+        FileMetadata metadata = null;
+        try {
+            metadata = session
+                    .getFiles()
+                    .stream()
+                    .filter(fileMetadata -> fileMetadata.isResume()
+                            && fileMetadata
+                            .getMimeType()
+                            .equals(fileService.mimeTypeExtensionMapper(fileType)))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("No resume found"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
 
+        try {
             Resource resource = fileService.getFileResource(metadata.getFileName());
             return ResponseEntity
                     .ok()
@@ -83,18 +90,18 @@ public class FileController {
                     .contentType(MediaType.parseMediaType(metadata.getMimeType()))
                     .contentLength(metadata.getSize())
                     .body(resource);
-        }
-
-        catch (IOException e) {
+        } catch (IOException e) {
             return ResponseEntity.internalServerError().build();
         }
-        catch (IllegalArgumentException e){
-            return ResponseEntity.badRequest().build();
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteFile(@RequestParam("id") String fileName, @CookieValue("sessionId") String sessionId)
+    public ResponseEntity<?> deleteFile(
+            @RequestParam("id") String fileName,
+            @CookieValue("sessionId") String sessionId)
     {
         try
         {
@@ -115,8 +122,10 @@ public class FileController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
     @DeleteMapping("/delete-all-files")
-    public ResponseEntity<?> deleteSessionFiles(@CookieValue("sessionId") String sessionId)
+    public ResponseEntity<?> deleteSessionFiles(
+            @CookieValue("sessionId") String sessionId)
     {
         try
         {
@@ -128,12 +137,13 @@ public class FileController {
             return ResponseEntity.internalServerError().build();
         }
         catch (IllegalArgumentException e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
     }
 
     @GetMapping("/uploaded-files")
-    public ResponseEntity<?> getUploadedFiles (@CookieValue("sessionId") String sessionId)
+    public ResponseEntity<?> getUploadedFiles (
+            @CookieValue("sessionId") String sessionId)
     {
         try{
             Set<FileMetadata> files = dataService.getFiles(sessionId).stream().filter(fileMetadata -> !fileMetadata.isResume()).collect(Collectors.toSet());
@@ -149,7 +159,7 @@ public class FileController {
             );
         }
         catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
         catch(Exception e) {
             return ResponseEntity.internalServerError().build();
@@ -157,13 +167,14 @@ public class FileController {
     }
 
     @GetMapping("available-file-types")
-    public ResponseEntity<?> getAvailableFileTypes(@CookieValue("sessionId") String sessionId)
+    public ResponseEntity<?> getAvailableFileTypes(
+            @CookieValue("sessionId") String sessionId)
     {
         try {
-            return ResponseEntity.ok(fileService.getAvailableFileTypes(sessionId));
+            return ResponseEntity.ok(fileService.getAvailableResumeFileTypes(sessionId));
         }
         catch (IllegalArgumentException e){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
 
     }

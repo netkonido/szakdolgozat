@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/api/v1/session")
 @AllArgsConstructor
@@ -39,7 +41,8 @@ public class SessionController {
      * {@code ResponseEntity} with status NOT FOUND otherwise.
      */
     @GetMapping("/get")
-    public ResponseEntity<?> getExistingSession(@CookieValue("sessionId") String sessionId)
+    public ResponseEntity<?> getExistingSession(
+            @CookieValue("sessionId") String sessionId)
     {
         Session session;
         try {
@@ -61,15 +64,16 @@ public class SessionController {
      */
     // TODO: unit test for service
     @DeleteMapping("/end")
-    public ResponseEntity<?> deleteSession(@CookieValue("sessionId") String sessionId)
+    public ResponseEntity<?> deleteSession(
+            @CookieValue("sessionId") String sessionId)
     {
         try {
             sessionService.endSession(sessionId);
         }
         catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
-        catch (Exception e) {
+        catch (IOException e) {
             return ResponseEntity.internalServerError().build();
         }
 
@@ -85,7 +89,8 @@ public class SessionController {
      */
     // TODO: unit test for service
     @GetMapping("/resume-preview")
-    public ResponseEntity<?> resumePreview(@CookieValue("sessionId") String sessionId)
+    public ResponseEntity<?> resumePreview(
+            @CookieValue("sessionId") String sessionId)
     {
         Session session;
         try {
@@ -124,13 +129,12 @@ public class SessionController {
         Session session;
         try {
             session = sessionService.getSessionById(sessionId);
-            session.setResumePreviewString(content);
         }
         catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.notFound().build();
         }
+
+        session.setResumePreviewString(content);
 
         return ResponseEntity.ok(sessionService.saveSession(session));
     }

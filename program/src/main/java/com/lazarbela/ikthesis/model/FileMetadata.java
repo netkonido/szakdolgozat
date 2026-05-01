@@ -29,5 +29,4 @@ public class FileMetadata {
     private Instant timestamp;
     private long size;
     private boolean isResume;
-    private boolean isProcessed;
 }

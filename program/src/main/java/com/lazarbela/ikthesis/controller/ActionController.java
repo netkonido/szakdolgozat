@@ -52,7 +52,8 @@ public class ActionController {
     }
 
     @GetMapping("/regenerate-resume")
-    public ResponseEntity<?> regenerateResume(@CookieValue("sessionId") String sessionId)
+    public ResponseEntity<?> regenerateResume(
+            @CookieValue("sessionId") String sessionId)
     {
         Session session;
         try{
@@ -78,7 +79,8 @@ public class ActionController {
     }
 
     @GetMapping("/prepare-resume")
-    public ResponseEntity<?> prepareResume(@CookieValue("sessionId") String sessionId)
+    public ResponseEntity<?> prepareResume(
+            @CookieValue("sessionId") String sessionId)
     {
         try{
             fileService.deleteResumes(sessionId);
@@ -86,6 +88,7 @@ public class ActionController {
         catch (IOException e){
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
+
         Session session;
         try{
             session = sessionService.getSessionById(sessionId);
@@ -104,7 +107,9 @@ public class ActionController {
     }
 
     @GetMapping("/convert-resume")
-    public ResponseEntity<?> convertResumes(@CookieValue("sessionId") String sessionId){
+    public ResponseEntity<?> convertResumes(
+            @CookieValue("sessionId") String sessionId)
+    {
         try{
             sessionService.getSessionById(sessionId);
         }
@@ -120,7 +125,6 @@ public class ActionController {
         }
 
         return ResponseEntity.ok().build();
-
     }
 
 }
